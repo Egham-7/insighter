@@ -205,6 +205,7 @@ export default function Hero() {
                   alt="Hero Illustration"
                   width={1200}
                   height={800}
+                  priority
                 />
               </div>
             </div>

@@ -1,124 +1,124 @@
 "use client";
-import { useEffect, useState } from "react";
-import { ProjectCard } from "@/components/home/ProjectCard";
-import { AddProjectCard } from "@/components/home/AddProjectCard";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/AppSidebar";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { useEffect, useState } from "react";
+import { FloatingActionButton } from "@/components/home/FloatingActionButton";
+import { DatasetCard } from "@/components/home/DatasetCard";
+import * as Papa from "papaparse";
 import { useRouter } from "next/navigation";
 
-interface Project {
+interface Dataset {
   id: string;
-  title: string;
+  name: string;
   description: string;
-  user_id: string;
+  date: string;
+  size: string;
+  data?: any;
 }
 
-interface User {
-  id: string;
-  email: string;
-  created_at: string;
-}
-
-// Sample data
-const SAMPLE_USER = {
-  id: "123e4567-e89b-12d3-a456-426614174000",
-  email: "demo@example.com",
-  created_at: "2024-01-01T00:00:00Z",
-};
-
-const SAMPLE_PROJECTS = [
+const SAMPLE_DATASETS: Dataset[] = [
   {
-    id: "123e4567-e89b-12d3-a456-426614174001",
-    title: "Market Analysis Dashboard",
-    description:
-      "Interactive dashboard for analyzing market trends and consumer behavior",
-    user_id: SAMPLE_USER.id,
+    id: "1",
+    name: "Sales Data 2023",
+    description: "Annual sales performance analysis",
+    date: "2024-01-15",
+    size: "2.5 MB",
+    data: [
+      { month: "January", revenue: 50000, units: 500 },
+      { month: "February", revenue: 55000, units: 550 },
+      { month: "March", revenue: 60000, units: 600 },
+    ],
   },
   {
-    id: "123e4567-e89b-12d3-a456-426614174002",
-    title: "Sales Forecasting Tool",
-    description:
-      "ML-powered tool for predicting future sales based on historical data",
-    user_id: SAMPLE_USER.id,
+    id: "2",
+    name: "Customer Feedback",
+    description: "Customer satisfaction survey results",
+    date: "2024-01-10",
+    size: "1.8 MB",
+    data: [
+      { customer_id: 1, rating: 4.5, feedback: "Great service" },
+      { customer_id: 2, rating: 4.0, feedback: "Good experience" },
+      { customer_id: 3, rating: 5.0, feedback: "Excellent support" },
+    ],
   },
 ];
 
-export default function HomePage() {
+export default function DatasetsPage() {
   const router = useRouter();
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setIsLoading] = useState<boolean>(false);
+  const [datasets, setDatasets] = useState<Dataset[]>([]);
 
   useEffect(() => {
-    // Simulate authentication check
-    setUser(SAMPLE_USER);
-    setProjects(SAMPLE_PROJECTS);
+    setDatasets(SAMPLE_DATASETS);
   }, []);
 
-  const handleAddProject = (title: string, description: string) => {
-    const newProject = {
-      id: crypto.randomUUID(),
-      title,
-      description,
-      user_id: SAMPLE_USER.id,
-    };
-    setProjects([newProject, ...projects]);
+  const handleAnalyse = (id: string) => {
+    const dataset = datasets.find((dataset) => dataset.id === id);
+    if (dataset) {
+      const queryParams = new URLSearchParams({
+        data: JSON.stringify(dataset.data),
+      }).toString();
+      router.push(`/home/analytics/${id}?${queryParams}`);
+    }
+  };
+
+  const handleAddDataset = (
+    title: string,
+    description: string,
+    file: File | null
+  ) => {
+    if (!file) return;
+    Papa.parse(file, {
+      header: true,
+      dynamicTyping: true,
+      complete: (results) => {
+        const newDataset: Dataset = {
+          id: crypto.randomUUID(),
+          name: title,
+          description: description,
+          date: new Date().toISOString().split("T")[0],
+          size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
+          data: results.data,
+        };
+        setDatasets([...datasets, newDataset]);
+      },
+    });
+  };
+
+  const handleDeleteDataset = (id: string) => {
+    setDatasets(datasets.filter((dataset) => dataset.id !== id));
   };
 
   return (
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <div className="flex flex-1 flex-col gap-4 p-4">
+        <div className="flex flex-1 flex-col gap-4 p-4 relative">
           <header className="space-y-2 text-center sm:text-left">
+            <div className="w-full h-[420px] rounded-lg overflow-hidden shadow-lg">
+              <img
+                src="/images/home.png"
+                alt="Analytics Dashboard"
+                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+              />
+            </div>
             <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
-              Home
+              Datasets
             </h2>
+
             <p className="text-lg text-muted-foreground">
-              Create and manage your data analysis projects
+              Upload and analyze your datasets
             </p>
           </header>
-
-          <div className="w-full h-[420px] rounded-lg overflow-hidden shadow-lg">
-            <img
-              src="/images/home.png"
-              alt="Analytics Dashboard"
-              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-            />
-          </div>
-
-          {user && (
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold">User Details</h2>
-              <div className="mt-2">
-                <p>
-                  <strong>ID:</strong> {user.id}
-                </p>
-                <p>
-                  <strong>Email:</strong> {user.email}
-                </p>
-                <p>
-                  <strong>Joined:</strong>{" "}
-                  {new Date(user.created_at).toLocaleDateString()}
-                </p>
-              </div>
-            </div>
-          )}
-
-          <div className="flex flex-wrap gap-6 justify-start">
-            <AddProjectCard onAdd={handleAddProject} />
-            {projects.map((project) => (
-              <ProjectCard
-                key={project.id}
-                id={project.id}
-                title={project.title}
-                description={project.description}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {datasets.map((dataset) => (
+              <DatasetCard
+                key={dataset.id}
+                dataset={dataset}
+                onDelete={handleDeleteDataset}
+                onAnalyse={handleAnalyse}
               />
             ))}
+            <FloatingActionButton onSubmit={handleAddDataset} />
           </div>
         </div>
       </SidebarInset>
