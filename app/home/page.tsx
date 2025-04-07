@@ -109,6 +109,29 @@ export default function DatasetsPage() {
               Upload and analyze your datasets
             </p>
           </header>
+
+          {datasets.length > 0 && (
+            <div className="mb-8 p-6 bg-gray-100 rounded-lg shadow-md text-black">
+              <h3 className="text-xl font-bold mb-4">Sample Data Preview</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-semibold mb-2">Headers:</h4>
+                  <pre className="bg-white p-4 rounded">
+                    {datasets[0]?.data &&
+                      JSON.stringify(Object.keys(datasets[0].data[0]), null, 2)}
+                  </pre>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Sample Row:</h4>
+                  <pre className="bg-white p-4 rounded">
+                    {datasets[0]?.data &&
+                      JSON.stringify(datasets[0].data[0], null, 2)}
+                  </pre>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {datasets.map((dataset) => (
               <DatasetCard

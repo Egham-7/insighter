@@ -22,6 +22,14 @@ export default function AnalyticsPage() {
             </p>
           </header>
 
+          {/* Data Preview Section */}
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h2 className="text-2xl font-semibold mb-4">Data Preview</h2>
+            <pre className="bg-gray-50 p-4 rounded overflow-auto">
+              {JSON.stringify(data, null, 2)}
+            </pre>
+          </div>
+
           {/* Add your visualization components here */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-white p-6 rounded-lg shadow-md">
