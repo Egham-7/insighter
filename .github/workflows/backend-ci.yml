@@ -19,7 +19,7 @@ on:
 jobs:
   test:
     name: Test Rust Backend
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     defaults:
       run:
         working-directory: ./src-tauri
