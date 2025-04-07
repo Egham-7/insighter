@@ -1,18 +1,30 @@
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
-export default function CTA() {
+export default function CallToAction() {
   return (
-    <section className="py-20 bg-primary text-secondary">
-      <div className="container mx-auto text-center">
-        <h2 className="text-3xl font-bold mb-6">
-          Ready to Expand Your Business?
-        </h2>
-        <p className="text-xl mb-8 max-w-2xl mx-auto">
-          Join us and unlock the potential of Business Analysis.
-        </p>
-        <Button size="lg" variant="secondary">
-          Start Your Free Trial
-        </Button>
+    <section className="py-16 md:py-32">
+      <div className="mx-auto max-w-5xl px-6">
+        <div className="text-center">
+          <h2 className="text-balance text-4xl font-semibold lg:text-5xl">
+            Start Building
+          </h2>
+          <p className="mt-4">Libero sapiente aliquam quibusdam aspernatur.</p>
+
+          <div className="mt-12 flex flex-wrap justify-center gap-4">
+            <Button asChild size="lg">
+              <Link href="/">
+                <span>Get Started</span>
+              </Link>
+            </Button>
+
+            <Button asChild size="lg" variant="outline">
+              <Link href="/">
+                <span>Book Demo</span>
+              </Link>
+            </Button>
+          </div>
+        </div>
       </div>
     </section>
   );

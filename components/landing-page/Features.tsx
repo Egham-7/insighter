@@ -1,88 +1,150 @@
-import type React from "react";
+"use client";
 import {
-  BarChart3,
-  TrendingUp,
-  ScissorsLineDashed,
-  BrainCircuit,
-  Zap,
-  PieChart,
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  ChartBarIncreasingIcon,
+  Database,
+  Fingerprint,
+  IdCard,
 } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { BorderBeam } from "@/components/magicui/border-beam";
 
-const Features: React.FC = () => {
+export default function Features() {
+  type ImageKey = "item-1" | "item-2" | "item-3" | "item-4";
+  const [activeItem, setActiveItem] = useState<ImageKey>("item-1");
+
+  const images = {
+    "item-1": {
+      image: "/charts.png",
+      alt: "Database visualization",
+    },
+    "item-2": {
+      image: "/music.png",
+      alt: "Security authentication",
+    },
+    "item-3": {
+      image: "/mail2.png",
+      alt: "Identity management",
+    },
+    "item-4": {
+      image: "/payments.png",
+      alt: "Analytics dashboard",
+    },
+  };
+
   return (
-    <section className="py-12 bg-white sm:py-16 lg:py-20">
-      <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold leading-tight text-gray-900 sm:text-4xl xl:text-5xl font-pj">
-            AI-Powered Business Intelligence for SMEs
+    <section className="py-12 md:py-20 lg:py-32">
+      <div className="bg-linear-to-b absolute inset-0 -z-10 sm:inset-6 sm:rounded-b-3xl dark:block dark:to-[color-mix(in_oklab,var(--color-zinc-900)_75%,var(--color-background))]"></div>
+      <div className="mx-auto max-w-5xl space-y-8 px-6 md:space-y-16 lg:space-y-20 dark:[--color-border:color-mix(in_oklab,var(--color-white)_10%,transparent)]">
+        <div className="relative z-10 mx-auto max-w-2xl space-y-6 text-center">
+          <h2 className="text-balance text-4xl font-semibold lg:text-6xl">
+            The foundation for AI
           </h2>
-          <p className="mt-4 text-base leading-7 text-gray-600 sm:mt-8 font-pj">
-            Boost your revenue and cut costs with our advanced AI analysis tools
+          <p>
+            Lyra is evolving to be more than just the models. It supports an
+            entire to the APIs and platforms helping developers and businesses
+            innovate.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 mt-10 text-center sm:mt-16 sm:grid-cols-2 sm:gap-x-12 gap-y-12 md:grid-cols-3 md:gap-0 xl:mt-24">
-          {features.map((feature, index) => (
-            <div
-              key={index}
-              className={`md:p-8 lg:p-14 ${
-                index > 0 && index % 3 !== 0
-                  ? "md:border-l md:border-gray-200"
-                  : ""
-              } ${index > 2 ? "md:border-t md:border-gray-200" : ""}`}
-            >
-              <feature.icon className="w-12 h-12 mx-auto text-blue-600" />
-              <h3 className="mt-12 text-xl font-bold text-gray-900 font-pj">
-                {feature.title}
-              </h3>
-              <p className="mt-5 text-base text-gray-600 font-pj">
-                {feature.description}
-              </p>
+        <div className="grid gap-12 sm:px-12 md:grid-cols-2 lg:gap-20 lg:px-0">
+          <Accordion
+            type="single"
+            value={activeItem}
+            onValueChange={(value) => setActiveItem(value as ImageKey)}
+            className="w-full"
+          >
+            <AccordionItem value="item-1">
+              <AccordionTrigger>
+                <div className="flex items-center gap-2 text-base">
+                  <Database className="size-4" />
+                  Database Visualization
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                Lyra is evolving to be more than just the models. It supports an
+                entire to the APIs and platforms helping developers and
+                businesses innovate.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-2">
+              <AccordionTrigger>
+                <div className="flex items-center gap-2 text-base">
+                  <Fingerprint className="size-4" />
+                  Advanced Authentication
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                Lyra is evolving to be more than just the models. It supports an
+                entire to the APIs and platforms helping developers and
+                businesses innovate.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-3">
+              <AccordionTrigger>
+                <div className="flex items-center gap-2 text-base">
+                  <IdCard className="size-4" />
+                  Identity Management
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                Lyra is evolving to be more than just the models. It supports an
+                entire to the APIs and platforms helping developers and
+                businesses innovate.
+              </AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="item-4">
+              <AccordionTrigger>
+                <div className="flex items-center gap-2 text-base">
+                  <ChartBarIncreasingIcon className="size-4" />
+                  Analytics Dashboard
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                Lyra is evolving to be more than just the models. It supports an
+                entire to the APIs and platforms helping developers and
+                businesses innovate.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+
+          <div className="bg-background relative flex overflow-hidden rounded-3xl border p-2">
+            <div className="w-15 absolute inset-0 right-0 ml-auto border-l bg-[repeating-linear-gradient(-45deg,var(--color-border),var(--color-border)_1px,transparent_1px,transparent_8px)]"></div>
+            <div className="aspect-76/59 bg-background relative w-[calc(3/4*100%+3rem)] rounded-2xl">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`${activeItem}-id`}
+                  initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                  transition={{ duration: 0.2 }}
+                  className="size-full overflow-hidden rounded-2xl border bg-zinc-900 shadow-md"
+                >
+                  <Image
+                    src={images[activeItem].image}
+                    className="size-full object-cover object-left-top dark:mix-blend-lighten"
+                    alt={images[activeItem].alt}
+                    width={1207}
+                    height={929}
+                  />
+                </motion.div>
+              </AnimatePresence>
             </div>
-          ))}
+            <BorderBeam
+              duration={6}
+              size={200}
+              className="from-transparent via-yellow-700 to-transparent dark:via-white/50"
+            />
+          </div>
         </div>
       </div>
     </section>
   );
-};
-
-const features = [
-  {
-    icon: BarChart3,
-    title: "Revenue Analysis",
-    description:
-      "Our AI analyzes your sales data to identify trends and opportunities for revenue growth, providing actionable insights to boost your bottom line.",
-  },
-  {
-    icon: ScissorsLineDashed,
-    title: "Cost Optimization",
-    description:
-      "Leverage AI to scrutinize your expenses, identifying areas for cost-cutting and efficiency improvements without sacrificing quality.",
-  },
-  {
-    icon: BrainCircuit,
-    title: "Predictive Analytics",
-    description:
-      "Harness the power of machine learning to forecast market trends, customer behavior, and potential risks, allowing you to stay ahead of the curve.",
-  },
-  {
-    icon: TrendingUp,
-    title: "Performance Tracking",
-    description:
-      "Monitor your key performance indicators in real-time, with AI-driven alerts and recommendations to keep your business on track.",
-  },
-  {
-    icon: Zap,
-    title: "Automated Insights",
-    description:
-      "Receive daily or weekly AI-generated reports highlighting critical business insights, saving you time and ensuring you never miss important trends.",
-  },
-  {
-    icon: PieChart,
-    title: "Custom Dashboards",
-    description:
-      "Create personalized, interactive dashboards that give you a 360-degree view of your business performance, tailored to your specific needs.",
-  },
-];
-
-export default Features;
+}

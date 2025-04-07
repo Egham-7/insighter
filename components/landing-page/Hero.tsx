@@ -1,217 +1,298 @@
-"use client";
-import { useState } from "react";
-import Image from "next/image";
+import React from "react";
 import Link from "next/link";
+import { ArrowRight, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { TextEffect } from "../TextEffect";
+import Image from "next/image";
+import { AnimatedGroup } from "../AnimatedGroup";
 
-export default function Hero() {
-  const [expanded, setExpanded] = useState(false);
+const transitionVariants = {
+  item: {
+    hidden: {
+      opacity: 0,
+      filter: "blur(12px)",
+      y: 12,
+    },
+    visible: {
+      opacity: 1,
+      filter: "blur(0px)",
+      y: 0,
+      transition: {
+        type: "spring",
+        bounce: 0.3,
+        duration: 1.5,
+      },
+    },
+  },
+};
 
+export default function HeroSection() {
   return (
-    <div className="overflow-x-hidden bg-gray-50">
-      <header className="py-4 md:py-6">
-        <div className="container px-4 mx-auto sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div className="flex-shrink-0">
-              <Link
-                href="#"
-                className="flex rounded outline-none focus:ring-1 focus:ring-gray-900 focus:ring-offset-2"
-              >
-                <Image
-                  className="w-30 h-30" // Adjust size as needed
-                  src="/images/key-logo.png"
-                  alt="Logo"
-                  width={100}
-                  height={100}
-                />
-              </Link>
-            </div>
-
-            <div className="flex lg:hidden">
-              <button
-                type="button"
-                className="text-gray-900"
-                onClick={() => setExpanded(!expanded)}
-                aria-expanded={expanded}
-              >
-                {!expanded ? (
-                  <svg
-                    className="w-7 h-7"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="1.5"
-                      d="M4 6h16M4 12h16M4 18h16"
-                    />
-                  </svg>
-                ) : (
-                  <svg
-                    className="w-7 h-7"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                )}
-              </button>
-            </div>
-
-            <div className="hidden lg:flex lg:ml-16 lg:items-center lg:justify-center lg:space-x-10 xl:space-x-16">
-              <Link
-                href="#"
-                className="text-base font-medium text-gray-900 transition-all duration-200 rounded focus:outline-none font-pj hover:text-opacity-50 focus:ring-1 focus:ring-gray-900 focus:ring-offset-2"
-              >
-                Features
-              </Link>
-              <Link
-                href="#"
-                className="text-base font-medium text-gray-900 transition-all duration-200 rounded focus:outline-none font-pj hover:text-opacity-50 focus:ring-1 focus:ring-gray-900 focus:ring-offset-2"
-              >
-                Pricing
-              </Link>
-              <Link
-                href="#"
-                className="text-base font-medium text-gray-900 transition-all duration-200 rounded focus:outline-none font-pj hover:text-opacity-50 focus:ring-1 focus:ring-gray-900 focus:ring-offset-2"
-              >
-                Automation
-              </Link>
-            </div>
-
-            <div className="hidden lg:ml-auto lg:flex lg:items-center lg:space-x-10">
-              <Link
-                href="/home"
-                className="text-base font-medium text-gray-900 transition-all duration-200 rounded focus:outline-none font-pj hover:text-opacity-50 focus:ring-1 focus:ring-gray-900 focus:ring-offset-2"
-              >
-                Customer Login
-              </Link>
-              <Link
-                href="/signup"
-                className="inline-flex items-center justify-center px-6 py-3 text-base font-bold leading-7 text-white transition-all duration-200 bg-gray-900 border border-transparent rounded-xl hover:bg-gray-600 font-pj focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900"
-              >
-                Sign up
-              </Link>
-            </div>
-          </div>
-
-          {expanded && (
-            <nav className="px-1 py-8">
-              <div className="grid gap-y-7">
-                <Link
-                  href="#"
-                  className="flex items-center p-3 -m-3 text-base font-medium text-gray-900 transition-all duration-200 rounded-xl hover:bg-gray-50 focus:outline-none font-pj focus:ring-1 focus:ring-gray-900 focus:ring-offset-2"
-                >
-                  Features
-                </Link>
-                <Link
-                  href="#"
-                  className="flex items-center p-3 -m-3 text-base font-medium text-gray-900 transition-all duration-200 rounded-xl hover:bg-gray-50 focus:outline-none font-pj focus:ring-1 focus:ring-gray-900 focus:ring-offset-2"
-                >
-                  Pricing
-                </Link>
-                <Link
-                  href="#"
-                  className="flex items-center p-3 -m-3 text-base font-medium text-gray-900 transition-all duration-200 rounded-xl hover:bg-gray-50 focus:outline-none font-pj focus:ring-1 focus:ring-gray-900 focus:ring-offset-2"
-                >
-                  Automation
-                </Link>
-                <Link
-                  href="#"
-                  className="flex items-center p-3 -m-3 text-base font-medium text-gray-900 transition-all duration-200 rounded-xl hover:bg-gray-50 focus:outline-none font-pj focus:ring-1 focus:ring-gray-900 focus:ring-offset-2"
-                >
-                  Customer Login
-                </Link>
-                <Link
-                  href="#"
-                  className="inline-flex items-center justify-center px-6 py-3 text-base font-bold leading-7 text-white transition-all duration-200 bg-gray-900 border border-transparent rounded-xl hover:bg-gray-600 font-pj focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900"
-                >
-                  Sign up
-                </Link>
-              </div>
-            </nav>
-          )}
+    <>
+      <main className="overflow-hidden">
+        <div
+          aria-hidden
+          className="absolute inset-0 isolate hidden opacity-65 contain-strict lg:block"
+        >
+          <div className="w-140 h-320 -translate-y-87.5 absolute left-0 top-0 -rotate-45 rounded-full bg-[radial-gradient(68.54%_68.72%_at_55.02%_31.46%,hsla(0,0%,85%,.08)_0,hsla(0,0%,55%,.02)_50%,hsla(0,0%,45%,0)_80%)]" />
+          <div className="h-320 absolute left-0 top-0 w-60 -rotate-45 rounded-full bg-[radial-gradient(50%_50%_at_50%_50%,hsla(0,0%,85%,.06)_0,hsla(0,0%,45%,.02)_80%,transparent_100%)] [translate:5%_-50%]" />
+          <div className="h-320 -translate-y-87.5 absolute left-0 top-0 w-60 -rotate-45 bg-[radial-gradient(50%_50%_at_50%_50%,hsla(0,0%,85%,.04)_0,hsla(0,0%,45%,.02)_80%,transparent_100%)]" />
         </div>
-      </header>
+        <section>
+          <div className="relative pt-24 md:pt-36">
+            <AnimatedGroup
+              variants={{
+                container: {
+                  visible: {
+                    transition: {
+                      delayChildren: 1,
+                    },
+                  },
+                },
+                item: {
+                  hidden: {
+                    opacity: 0,
+                    y: 20,
+                  },
+                  visible: {
+                    opacity: 1,
+                    y: 0,
+                    transition: {
+                      type: "spring",
+                      bounce: 0.3,
+                      duration: 2,
+                    },
+                  },
+                },
+              }}
+              className="absolute inset-0 -z-20"
+            >
+              <Image
+                src="https://res.cloudinary.com/dg4jhba5c/image/upload/v1741605538/night-background_ni3vqb.jpg"
+                alt="background"
+                className="absolute inset-x-0 top-56 -z-20 hidden lg:top-32 dark:block"
+                width="3276"
+                height="4095"
+              />
+            </AnimatedGroup>
+            <div className="absolute inset-0 -z-10 size-full [background:radial-gradient(125%_125%_at_50%_100%,transparent_0%,var(--color-background)_75%)]"></div>
+            <div className="mx-auto max-w-7xl px-6">
+              <div className="text-center sm:mx-auto lg:mr-auto lg:mt-0">
+                <AnimatedGroup variants={transitionVariants}>
+                  <Link
+                    href="#link"
+                    className="hover:bg-background dark:hover:border-t-border bg-muted group mx-auto flex w-fit items-center gap-4 rounded-full border p-1 pl-4 shadow-md shadow-zinc-950/5 transition-colors duration-300 dark:border-t-white/5 dark:shadow-zinc-950"
+                  >
+                    <span className="text-foreground text-sm">
+                      Introducing Support for AI Models
+                    </span>
+                    <span className="dark:border-background block h-4 w-0.5 border-l bg-white dark:bg-zinc-700"></span>
 
-      <section className="pt-12 bg-gray-50 sm:pt-16">
-        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-          <div className="max-w-2xl mx-auto text-center">
-            <h1 className="px-6 text-lg text-gray-600 font-inter">
-              AI Business Analysis Platform Built For SMES
-            </h1>
-            <p className="mt-5 text-3xl font-bold leading-tight text-gray-900 sm:leading-tight sm:text-5xl lg:text-6xl lg:leading-tight font-pj">
-              Scale Your Business With AI Technology
-              <span className="relative inline-flex sm:inline">
-                <span className="bg-gradient-to-r from-[#44BCFF] via-[#FF44EC] to-[#FF675E] blur-lg filter opacity-30 w-full h-full absolute inset-0"></span>
-                <span className="relative"> </span>
-              </span>
-            </p>
+                    <div className="bg-background group-hover:bg-muted size-6 overflow-hidden rounded-full duration-500">
+                      <div className="flex w-12 -translate-x-1/2 duration-500 ease-in-out group-hover:translate-x-0">
+                        <span className="flex size-6">
+                          <ArrowRight className="m-auto size-3" />
+                        </span>
+                        <span className="flex size-6">
+                          <ArrowRight className="m-auto size-3" />
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                </AnimatedGroup>
 
-            <div className="px-8 sm:items-center sm:justify-center sm:px-0 sm:space-x-5 sm:flex mt-9">
-              <Link
-                href="#"
-                className="inline-flex items-center justify-center w-full px-8 py-3 text-lg font-bold text-white transition-all duration-200 bg-gray-900 border-2 border-transparent sm:w-auto rounded-xl font-pj hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900"
-              >
-                Get more customers
-              </Link>
-
-              <Link
-                href="#"
-                className="inline-flex items-center justify-center w-full px-6 py-3 mt-4 text-lg font-bold text-gray-900 transition-all duration-200 border-2 border-gray-400 sm:w-auto sm:mt-0 rounded-xl font-pj focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 hover:bg-gray-900 focus:bg-gray-900 hover:text-white focus:text-white hover:border-gray-900 focus:border-gray-900"
-              >
-                <svg
-                  className="w-5 h-5 mr-2"
-                  viewBox="0 0 18 18"
-                  fill="none"
-                  stroke="currentColor"
-                  xmlns="http://www.w3.org/2000/svg"
+                <TextEffect
+                  preset="fade-in-blur"
+                  speedSegment={0.3}
+                  as="h1"
+                  className="mt-8 text-balance text-6xl md:text-7xl lg:mt-16 xl:text-[5.25rem]"
                 >
-                  <path
-                    d="M8.18003 13.4261C6.8586 14.3918 5 13.448 5 11.8113V5.43865C5 3.80198 6.8586 2.85821 8.18003 3.82387L12.5403 7.01022C13.6336 7.80916 13.6336 9.44084 12.5403 10.2398L8.18003 13.4261Z"
-                    strokeWidth="2"
-                    strokeMiterlimit="10"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                  Modern Solutions for Customer Engagement
+                </TextEffect>
+                <TextEffect
+                  per="line"
+                  preset="fade-in-blur"
+                  speedSegment={0.3}
+                  delay={0.5}
+                  as="p"
+                  className="mx-auto mt-8 max-w-2xl text-balance text-lg"
+                >
+                  Highly customizable components for building modern websites
+                  and applications that look and feel the way you mean it.
+                </TextEffect>
+
+                <AnimatedGroup
+                  variants={{
+                    container: {
+                      visible: {
+                        transition: {
+                          staggerChildren: 0.05,
+                          delayChildren: 0.75,
+                        },
+                      },
+                    },
+                    ...transitionVariants,
+                  }}
+                  className="mt-12 flex flex-col items-center justify-center gap-2 md:flex-row"
+                >
+                  <div
+                    key={1}
+                    className="bg-foreground/10 rounded-[calc(var(--radius-xl)+0.125rem)] border p-0.5"
+                  >
+                    <Button
+                      asChild
+                      size="lg"
+                      className="rounded-xl px-5 text-base"
+                    >
+                      <Link href="#link">
+                        <span className="text-nowrap">Start Building</span>
+                      </Link>
+                    </Button>
+                  </div>
+                  <Button
+                    key={2}
+                    asChild
+                    size="lg"
+                    variant="ghost"
+                    className="h-10.5 rounded-xl px-5"
+                  >
+                    <Link href="#link">
+                      <span className="text-nowrap">Request a demo</span>
+                    </Link>
+                  </Button>
+                </AnimatedGroup>
+              </div>
+            </div>
+
+            <AnimatedGroup
+              variants={{
+                container: {
+                  visible: {
+                    transition: {
+                      staggerChildren: 0.05,
+                      delayChildren: 0.75,
+                    },
+                  },
+                },
+                ...transitionVariants,
+              }}
+            >
+              <div className="relative -mr-56 mt-8 overflow-hidden px-2 sm:mr-0 sm:mt-12 md:mt-20">
+                <div
+                  aria-hidden
+                  className="bg-linear-to-b to-background absolute inset-0 z-10 from-transparent from-35%"
+                />
+                <div className="inset-shadow-2xs ring-background dark:inset-shadow-white/20 bg-background relative mx-auto max-w-6xl overflow-hidden rounded-2xl border p-4 shadow-lg shadow-zinc-950/15 ring-1">
+                  <Image
+                    className="bg-background aspect-15/8 relative hidden rounded-2xl dark:block"
+                    src="/mail2.png"
+                    alt="app screen"
+                    width="2700"
+                    height="1440"
                   />
-                </svg>
-                Watch free demo
+                  <Image
+                    className="z-2 border-border/25 aspect-15/8 relative rounded-2xl border dark:hidden"
+                    src="/mail2-light.png"
+                    alt="app screen"
+                    width="2700"
+                    height="1440"
+                  />
+                </div>
+              </div>
+            </AnimatedGroup>
+          </div>
+        </section>
+        <section className="bg-background pb-16 pt-16 md:pb-32">
+          <div className="group relative m-auto max-w-5xl px-6">
+            <div className="absolute inset-0 z-10 flex scale-95 items-center justify-center opacity-0 duration-500 group-hover:scale-100 group-hover:opacity-100">
+              <Link
+                href="/"
+                className="block text-sm duration-150 hover:opacity-75"
+              >
+                <span> Meet Our Customers</span>
+
+                <ChevronRight className="ml-1 inline-block size-3" />
               </Link>
             </div>
-
-            <p className="mt-8 text-base text-gray-500 font-inter">
-              60 Days free trial · No credit card required
-            </p>
-          </div>
-        </div>
-
-        <div className="pb-12 bg-white">
-          <div className="relative">
-            <div className="absolute inset-0 h-2/3 bg-gray-50"></div>
-            <div className="relative mx-auto">
-              <div className="lg:max-w-6xl lg:mx-auto">
+            <div className="group-hover:blur-xs mx-auto mt-12 grid max-w-2xl grid-cols-4 gap-x-12 gap-y-8 transition-all duration-500 group-hover:opacity-50 sm:gap-x-16 sm:gap-y-14">
+              <div className="flex">
                 <Image
-                  className="transform scale-110"
-                  src="/images/home.png"
-                  alt="Hero Illustration"
-                  width={1200}
-                  height={800}
-                  priority
+                  className="mx-auto h-5 w-fit dark:invert"
+                  src="https://html.tailus.io/blocks/customers/nvidia.svg"
+                  alt="Nvidia Logo"
+                  width={500}
+                  height="20"
+                />
+              </div>
+
+              <div className="flex">
+                <Image
+                  className="mx-auto h-4 w-fit dark:invert"
+                  src="https://html.tailus.io/blocks/customers/column.svg"
+                  alt="Column Logo"
+                  width={500}
+                  height="16"
+                />
+              </div>
+              <div className="flex">
+                <Image
+                  className="mx-auto h-4 w-fit dark:invert"
+                  src="https://html.tailus.io/blocks/customers/github.svg"
+                  alt="GitHub Logo"
+                  width={500}
+                  height="16"
+                />
+              </div>
+              <div className="flex">
+                <Image
+                  className="mx-auto h-5 w-fit dark:invert"
+                  src="https://html.tailus.io/blocks/customers/nike.svg"
+                  alt="Nike Logo"
+                  height="20"
+                  width={500}
+                />
+              </div>
+              <div className="flex">
+                <Image
+                  className="mx-auto h-5 w-fit dark:invert"
+                  src="https://html.tailus.io/blocks/customers/lemonsqueezy.svg"
+                  alt="Lemon Squeezy Logo"
+                  width={500}
+                  height="20"
+                />
+              </div>
+              <div className="flex">
+                <Image
+                  className="mx-auto h-4 w-fit dark:invert"
+                  src="https://html.tailus.io/blocks/customers/laravel.svg"
+                  alt="Laravel Logo"
+                  height="16"
+                  width={500}
+                />
+              </div>
+              <div className="flex">
+                <Image
+                  className="mx-auto h-7 w-fit dark:invert"
+                  src="https://html.tailus.io/blocks/customers/lilly.svg"
+                  alt="Lilly Logo"
+                  height="28"
+                  width={500}
+                />
+              </div>
+
+              <div className="flex">
+                <Image
+                  className="mx-auto h-6 w-fit dark:invert"
+                  src="https://html.tailus.io/blocks/customers/openai.svg"
+                  alt="OpenAI Logo"
+                  height="24"
+                  width={500}
                 />
               </div>
             </div>
           </div>
-        </div>
-      </section>
-    </div>
+        </section>
+      </main>
+    </>
   );
 }
