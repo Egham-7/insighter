@@ -1,4 +1,4 @@
-name: Backend CI
+name: Cross Platform CI
 
 on:
   push:
@@ -10,6 +10,9 @@ jobs:
   test:
     name: Test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: ./src-tauri
     strategy:
       matrix:
         os: [ubuntu-22.04, macos-latest, windows-latest]
