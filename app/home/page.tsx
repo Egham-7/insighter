@@ -13,7 +13,7 @@ interface Dataset {
   description: string;
   date: string;
   size: string;
-  data?: any;
+  data?: unknown[];
 }
 
 const SAMPLE_DATASETS: Dataset[] = [
@@ -64,7 +64,7 @@ export default function DatasetsPage() {
   const handleAddDataset = (
     title: string,
     description: string,
-    file: File | null
+    file: File | null,
   ) => {
     if (!file) return;
     Papa.parse(file, {
@@ -94,13 +94,6 @@ export default function DatasetsPage() {
       <SidebarInset>
         <div className="flex flex-1 flex-col gap-4 p-4 relative">
           <header className="space-y-2 text-center sm:text-left">
-            <div className="w-full h-[420px] rounded-lg overflow-hidden shadow-lg">
-              <img
-                src="/images/home.png"
-                alt="Analytics Dashboard"
-                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-              />
-            </div>
             <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
               Datasets
             </h2>
@@ -118,7 +111,11 @@ export default function DatasetsPage() {
                   <h4 className="font-semibold mb-2">Headers:</h4>
                   <pre className="bg-white p-4 rounded">
                     {datasets[0]?.data &&
-                      JSON.stringify(Object.keys(datasets[0].data[0]), null, 2)}
+                      JSON.stringify(
+                        Object.keys(datasets[0].data[0]!),
+                        null,
+                        2,
+                      )}
                   </pre>
                 </div>
                 <div>
