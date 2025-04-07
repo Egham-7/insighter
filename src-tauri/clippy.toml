@@ -3,16 +3,12 @@ cognitive-complexity-threshold = 20
 too-many-arguments-threshold = 6
 type-complexity-threshold = 250
 
-# Performance
-perf-allocation-size-threshold = 2000
-perf-unnecessary-operation-threshold = 100
-
 # Documentation
 doc-valid-idents = ["RFC", "API", "TCP", "UDP", "HTTP", "HTTPS", "IO"]
 
 # Type safety
-arithmetic-side-effects-allowed = false
-float-arithmetic-allowed = true
+arithmetic-side-effects-allowed-binary = false
+arithmetic-side-effects-allowed-unary = false
 
 # Style preferences
-blacklisted-names = ["foo", "bar", "baz"]
+disallowed-names = ["foo", "bar", "baz"]
