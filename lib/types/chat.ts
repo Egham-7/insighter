@@ -1,40 +1,57 @@
-"use server";
-
 import { invoke } from "@tauri-apps/api/tauri";
 
-export interface CsvRecord {
-  values: string[];
+// Literal type for roles to prevent arbitrary strings
+export type ChatRole = "user" | "assistant" | "system";
+
+export enum FileType {
+  CSV = "csv",
 }
 
-export interface JsonRecord {
-  [key: string]: unknown;
+// Type guard for FileType
+export function isFileType(value: string): value is FileType {
+  return Object.values(FileType).includes(value as FileType);
 }
 
-export interface TextRecord {
-  content: string;
+export interface FileAttachment {
+  readonly file_name: string;
+  readonly file_type: FileType;
+  readonly data: JsonValue;
 }
 
-export type SupportedRecordTypes = CsvRecord | JsonRecord | TextRecord;
+// Type to represent any valid JSON value
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
 
-export interface ChatMessage<T = SupportedRecordTypes> {
-  role: string;
-  content: string;
-  attachments: T[];
-  timestamp: number;
+export interface ChatMessage {
+  readonly role: ChatRole;
+  readonly content: string;
+  readonly attachments: readonly FileAttachment[];
+  readonly timestamp: number;
 }
 
-export async function createChatMessage<T = SupportedRecordTypes>(
-  role: string,
+export interface PartialChatMessage {
+  readonly role?: ChatRole;
+  readonly content?: string;
+  readonly file_paths?: readonly (string | null)[];
+  readonly timestamp?: number;
+}
+
+export async function createChatMessage(
+  role: ChatRole,
   content: string,
-  filePaths: (string | null)[] = [],
+  filePaths: readonly string[] = [],
   timestamp = Date.now(),
-): Promise<ChatMessage<T>> {
-  const message = await invoke<ChatMessage<T>>("create_chat_message", {
+): Promise<ChatMessage> {
+  const message = await invoke<ChatMessage>("create_chat_message", {
     role,
     content,
     file_paths: filePaths,
     timestamp,
   });
-
   return message;
 }
