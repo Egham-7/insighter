@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ChatMessage {
@@ -29,14 +30,22 @@ pub struct FileAttachment {
     pub file_name: String,
     pub file_type: String,
     pub data: serde_json::Value,
+    #[serde(skip)]
+    pub file_path: PathBuf,
 }
 
 impl FileAttachment {
-    pub fn new(file_name: String, file_type: String, data: serde_json::Value) -> Self {
+    pub fn new(
+        file_name: String,
+        file_type: String,
+        data: serde_json::Value,
+        file_path: PathBuf,
+    ) -> Self {
         Self {
             file_name,
             file_type,
             data,
+            file_path,
         }
     }
 }

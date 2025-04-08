@@ -23,6 +23,7 @@ impl FileParser for CsvParser {
             file_name.clone(),
             "csv".to_string(),
             serde_json::Value::Array(csv_data),
+            path,
         );
 
         Ok(ParsedData::new(vec![attachment], file_name))

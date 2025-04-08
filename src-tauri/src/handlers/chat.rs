@@ -7,19 +7,24 @@ use std::path::PathBuf;
 pub fn create_chat_message(
     role: String,
     content: String,
-    file_path: Option<String>,
+    file_paths: Vec<Option<String>>,
     timestamp: i64,
 ) -> Result<ChatMessage, String> {
-    let attachments = if let Some(path) = file_path {
-        let parser = CsvParser;
-        let path = PathBuf::from(path);
-        if !parser.validate(&path) {
-            return Err("Invalid file format. Only CSV files are supported.".into());
+    let attachments = if !file_paths.is_empty() {
+        let mut all_records = Vec::new();
+        for file_path in file_paths.into_iter().flatten() {
+            let parser = CsvParser;
+            let path = PathBuf::from(file_path);
+            if !parser.validate(&path) {
+                continue;
+            }
+            let records = parser
+                .parse(path)
+                .map(|data| data.records().to_vec())
+                .map_err(|e| e.to_string())?;
+            all_records.extend(records);
         }
-        parser
-            .parse(path)
-            .map(|data| data.records().to_vec())
-            .map_err(|e| e.to_string())?
+        all_records
     } else {
         Vec::new()
     };
