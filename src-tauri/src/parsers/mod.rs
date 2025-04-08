@@ -30,4 +30,3 @@ pub trait FileParser {
     fn parse(&self, path: PathBuf) -> Result<ParsedData<Self::Output>, Box<dyn std::error::Error>>;
     fn validate(&self, path: &Path) -> bool;
 }
-
