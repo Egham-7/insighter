@@ -116,92 +116,90 @@ export function ChatForm({ className, ...props }: React.ComponentProps<"div">) {
               onSubmit={form.handleSubmit(onSubmit)}
               className="mx-auto max-w-3xl"
             >
-              <div className="relative rounded-2xl border bg-background p-4 shadow-sm focus-within:ring-2 focus-within:ring-primary/20">
-                {files && files.length > 0 && (
-                  <div className="mb-4 flex flex-wrap gap-2">
-                    {Array.from(files).map((file, i) => (
-                      <div
-                        key={i}
-                        className="relative rounded-lg border bg-muted/30 p-2"
-                      >
-                        <div className="relative h-16 w-16 overflow-hidden rounded-lg">
-                          <Image
-                            src={URL.createObjectURL(file)}
-                            alt={file.name}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                        <Button
-                          type="button"
-                          onClick={() => setFiles(null)}
-                          size="icon"
-                          variant="secondary"
-                          className="absolute -right-2 -top-2 h-6 w-6 rounded-full"
-                        >
-                          <X size={12} />
-                          <span className="sr-only">Remove file</span>
-                        </Button>
+              {files && files.length > 0 && (
+                <div className="mb-4 flex flex-wrap gap-2">
+                  {Array.from(files).map((file, i) => (
+                    <div
+                      key={i}
+                      className="relative rounded-lg border bg-muted/30 p-2"
+                    >
+                      <div className="relative h-16 w-16 overflow-hidden rounded-lg">
+                        <Image
+                          src={URL.createObjectURL(file)}
+                          alt={file.name}
+                          fill
+                          className="object-cover"
+                        />
                       </div>
-                    ))}
-                  </div>
-                )}
-
-                <div className="flex items-end gap-2">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <label
-                        htmlFor="file-upload"
-                        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full hover:bg-muted"
-                      >
-                        <Paperclip
-                          size={20}
-                          className="text-muted-foreground transition-colors hover:text-foreground"
-                        />
-                        <span className="sr-only">Attach files</span>
-                        <Input
-                          id="file-upload"
-                          type="file"
-                          multiple
-                          className="hidden"
-                          onChange={(e) => setFiles(e.target.files)}
-                        />
-                      </label>
-                    </TooltipTrigger>
-                    <TooltipContent>Attach files</TooltipContent>
-                  </Tooltip>
-
-                  <FormField
-                    control={form.control}
-                    name="message"
-                    render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <FormControl>
-                          <AutoResizeTextarea
-                            {...field}
-                            onKeyDown={handleKeyDown}
-                            placeholder="Type a message..."
-                            className="min-h-36 w-96 resize-none bg-transparent px-2 py-2 placeholder:text-muted-foreground focus:outline-none"
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
                       <Button
-                        type="submit"
+                        type="button"
+                        onClick={() => setFiles(null)}
                         size="icon"
-                        className="h-10 w-10 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
+                        variant="secondary"
+                        className="absolute -right-2 -top-2 h-6 w-6 rounded-full"
                       >
-                        <ArrowUp size={18} />
-                        <span className="sr-only">Send message</span>
+                        <X size={12} />
+                        <span className="sr-only">Remove file</span>
                       </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Send message</TooltipContent>
-                  </Tooltip>
+                    </div>
+                  ))}
                 </div>
+              )}
+
+              <div className="relative rounded-2xl border bg-background shadow-sm focus-within:ring-2 focus-within:ring-primary/20">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <label
+                      htmlFor="file-upload"
+                      className="absolute bottom-3 left-3 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full hover:bg-muted"
+                    >
+                      <Paperclip
+                        size={20}
+                        className="text-muted-foreground transition-colors hover:text-foreground"
+                      />
+                      <span className="sr-only">Attach files</span>
+                      <Input
+                        id="file-upload"
+                        type="file"
+                        multiple
+                        className="hidden"
+                        onChange={(e) => setFiles(e.target.files)}
+                      />
+                    </label>
+                  </TooltipTrigger>
+                  <TooltipContent>Attach files</TooltipContent>
+                </Tooltip>
+
+                <FormField
+                  control={form.control}
+                  name="message"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormControl>
+                        <AutoResizeTextarea
+                          {...field}
+                          onKeyDown={handleKeyDown}
+                          placeholder="Type a message..."
+                          className="min-h-32 w-full resize-none bg-transparent px-14 py-4 placeholder:text-muted-foreground focus:outline-none"
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="submit"
+                      size="icon"
+                      className="absolute bottom-3 right-3 h-10 w-10 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
+                    >
+                      <ArrowUp size={18} />
+                      <span className="sr-only">Send message</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Send message</TooltipContent>
+                </Tooltip>
               </div>
             </form>
           </Form>
