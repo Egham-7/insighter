@@ -9,6 +9,14 @@ pub struct ChatMessage {
     pub timestamp: i64,
 }
 
+#[derive(serde::Deserialize)]
+pub struct PartialChatMessage {
+    pub role: Option<String>,
+    pub content: Option<String>,
+    pub file_paths: Option<Vec<Option<String>>>,
+    pub timestamp: Option<i64>,
+}
+
 impl ChatMessage {
     pub fn new(
         role: String,
@@ -22,6 +30,19 @@ impl ChatMessage {
             attachments,
             timestamp,
         }
+    }
+
+    pub fn set_role(&mut self, role: String) {
+        self.role = role;
+    }
+    pub fn set_content(&mut self, content: String) {
+        self.content = content;
+    }
+    pub fn set_attachments(&mut self, attachments: Vec<FileAttachment>) {
+        self.attachments = attachments;
+    }
+    pub fn set_timestamp(&mut self, timestamp: i64) {
+        self.timestamp = timestamp;
     }
 }
 

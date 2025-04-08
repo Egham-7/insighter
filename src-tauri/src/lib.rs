@@ -23,6 +23,11 @@ pub fn run() {
             .build(),
     );
 
+    builder = builder.invoke_handler(tauri::generate_handler![
+        handlers::chat::create_chat_message,
+        handlers::chat::update_chat_message,
+    ]);
+
     builder
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
