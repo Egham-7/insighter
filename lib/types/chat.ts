@@ -1,5 +1,3 @@
-import { invoke } from "@tauri-apps/api/core";
-
 // Literal type for roles to prevent arbitrary strings
 export type ChatRole = "user" | "assistant" | "system";
 
@@ -39,19 +37,4 @@ export interface PartialChatMessage {
   readonly content?: string;
   readonly file_paths?: readonly (string | null)[];
   readonly timestamp?: number;
-}
-
-export async function createChatMessage(
-  role: ChatRole,
-  content: string,
-  filePaths: readonly string[] = [],
-  timestamp = Date.now(),
-): Promise<ChatMessage> {
-  const message = await invoke<ChatMessage>("create_chat_message", {
-    role,
-    content,
-    file_paths: filePaths,
-    timestamp,
-  });
-  return message;
 }
