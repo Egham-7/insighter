@@ -66,7 +66,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
           </div>
         )}
         {message.id && message.role === "user" && (
-          <div className="absolute -right-16 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+          <div className="absolute -right-20 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
             <Button
               variant="ghost"
               size="icon"
