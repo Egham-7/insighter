@@ -13,7 +13,10 @@ import {
 import { AutoResizeTextarea } from "../AutoResizeTextArea";
 import { useState } from "react";
 import { FileAttachments } from "./FileAttachments";
-import { createChatMessage } from "@/lib/actions/chat";
+import { useCreateChatMessage } from "@/hooks/chat/useCreateChatMessage";
+import useParseCsv from "@/hooks/parsers/useParseCsv";
+import { FileAttachment, FileType } from "@/lib/types/chat";
+import { useUpdateChatMessage } from "@/hooks/chat/useUpdateChatMessage";
 
 const formSchema = z.object({
   message: z.string().min(1, "Message is required"),
@@ -29,9 +32,33 @@ export function ChatInput() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  const { mutateAsync: createChatMessage } = useCreateChatMessage();
+  const { mutateAsync: parseCsv } = useParseCsv();
+  const { mutateAsync: updateChatMessage } = useUpdateChatMessage();
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     const file_paths = files ? Array.from(files).map((file) => file.name) : [];
-    createChatMessage("user", values.message, Date.now(), file_paths);
+
+    const chatMessage = await createChatMessage({
+      role: "user",
+      content: values.message,
+      timestamp: Date.now(),
+    });
+
+    const parsedData = await Promise.all(
+      file_paths.map(async (filePath) => {
+        return parseCsv(filePath);
+      }),
+    );
+
+    const attachments: FileAttachment[] = parsedData.map((data, index) => ({
+      file_name: file_paths[index],
+      file_type: FileType.CSV,
+      data: JSON.stringify(data),
+      chat_message_id: chatMessage.id,
+    }));
+    const id = chatMessage.id;
+    await updateChatMessage({ id, updates: { ...chatMessage, attachments } });
     setFiles(undefined);
     form.reset();
   }

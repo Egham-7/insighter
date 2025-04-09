@@ -1,5 +1,3 @@
-"use client";
-
 import type { ChatMessage } from "@/lib/types/chat";
 import { ChatMessage as ChatMessageComponent } from "./ChatMessage";
 

@@ -1,20 +1,44 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useMutation } from "@tanstack/react-query";
 import { ChatMessage } from "@/lib/types/chat";
-import { useGetMessage } from "../chat/useGetChatMessage";
-import db from "@/lib/db";
+import { useDatabase } from "../use-db";
 
-export const useUpdateChatMessage = (id: number) => {
+export const useUpdateChatMessage = () => {
   const queryClient = useQueryClient();
-  const { data: message } = useGetMessage(id);
+
+  const { db, error, loading } = useDatabase();
 
   return useMutation({
     mutationFn: async ({
+      id,
       updates,
     }: {
       id: number;
       updates: Partial<ChatMessage>;
     }) => {
+      if (loading) {
+        throw new Error("Database is loading");
+      }
+      if (error) {
+        throw new Error("Error loading database");
+      }
+
+      if (!db) {
+        throw new Error("Database not initialized");
+      }
+      // Get the current message from the cache
+      let message = queryClient.getQueryData<ChatMessage>(["message", id]);
+
+      if (!message) {
+        message = (await db.select("SELECT * FROM chat_messages WHERE id = ?", [
+          id,
+        ])) as ChatMessage;
+      }
+
+      if (!message) {
+        throw new Error("Message not found");
+      }
+
       // Create updated message by merging current message with updates
       const updatedMessage = {
         ...message,
@@ -56,7 +80,7 @@ export const useUpdateChatMessage = (id: number) => {
 
       return updatedMessage;
     },
-    onSuccess: (data, { id }) => {
+    onSuccess: ({ id }) => {
       queryClient.invalidateQueries({ queryKey: ["message", id] });
       queryClient.invalidateQueries({ queryKey: ["messages"] });
     },

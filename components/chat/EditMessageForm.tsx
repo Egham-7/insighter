@@ -3,7 +3,7 @@ import type { ChatMessage as ChatMessageType } from "@/lib/types/chat";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Check, X } from "lucide-react";
-import { updateChatMessage } from "@/lib/actions/chat";
+import { useUpdateChatMessage } from "@/hooks/chat/useUpdateChatMessage";
 
 interface EditMessageFormProps {
   message: Partial<ChatMessageType>;
@@ -19,6 +19,8 @@ export function EditMessageForm({
   const [content, setContent] = useState(message.content || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { mutateAsync: updateChatMessage } = useUpdateChatMessage();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -26,7 +28,10 @@ export function EditMessageForm({
 
     setIsSubmitting(true);
     try {
-      await updateChatMessage(message.id, { content });
+      await updateChatMessage({
+        id: message.id,
+        updates: { ...message, content },
+      });
       onSave();
     } catch (error) {
       console.error("Failed to update message:", error);

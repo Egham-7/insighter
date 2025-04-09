@@ -21,6 +21,6 @@ export interface ChatMessage {
   readonly id: number;
   readonly role: ChatRole;
   readonly content: string;
-  attachments: readonly FileAttachment[];
+  attachments?: readonly FileAttachment[];
   readonly timestamp: number;
 }

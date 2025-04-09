@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 import type { ChatMessage as ChatMessageType } from "@/lib/types/chat";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2 } from "lucide-react";
-import { deleteChatMessage } from "@/lib/actions/chat";
 import { EditMessageForm } from "./EditMessageForm";
+import useDeleteChatMessage from "@/hooks/chat/useDeleteChatMessage";
 
 interface ChatMessageProps {
   message: Partial<ChatMessageType>;
@@ -15,6 +15,8 @@ interface ChatMessageProps {
 
 export function ChatMessage({ message }: ChatMessageProps) {
   const [isEditing, setIsEditing] = useState(false);
+
+  const { mutateAsync: deleteChatMessage } = useDeleteChatMessage();
 
   const handleDelete = async (id: number) => {
     await deleteChatMessage(id);

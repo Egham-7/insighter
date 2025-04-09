@@ -1,12 +1,24 @@
 import { useQuery } from "@tanstack/react-query";
 import { ChatMessage } from "@/lib/types/chat";
 import { FileAttachment } from "@/lib/types/chat";
-import db from "@/lib/db";
+import { useDatabase } from "../use-db";
 
 export const useGetAllChatMessages = () => {
+  const { db, loading, error } = useDatabase();
   return useQuery({
     queryKey: ["messages"],
     queryFn: async () => {
+      if (loading) {
+        throw new Error("Database is loading");
+      }
+
+      if (error) {
+        throw new Error("Error loading database");
+      }
+
+      if (!db) {
+        throw new Error("Database not initialized");
+      }
       const messagesResult = (await db.select(
         "SELECT id, role, content, timestamp FROM chat_messages ORDER BY timestamp ASC",
       )) as ChatMessage[];
