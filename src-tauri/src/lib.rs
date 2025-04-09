@@ -5,7 +5,7 @@ pub mod parsers;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let mut builder = tauri::Builder::default();
+    let mut builder = tauri::Builder::default().plugin(tauri_plugin_http::init());
     let migrations = crate::db::migrations::get_migrations();
 
     #[cfg(debug_assertions)]
@@ -22,6 +22,10 @@ pub fn run() {
             .add_migrations("sqlite:insighter.db", migrations)
             .build(),
     );
+
+    builder = builder.invoke_handler(tauri::generate_handler![
+        crate::handlers::parsers::parse_csv,
+    ]);
 
     builder
         .run(tauri::generate_context!())
