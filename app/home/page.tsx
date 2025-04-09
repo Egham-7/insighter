@@ -1,5 +1,7 @@
-import { ChatForm } from "@/components/chat/chat-form";
+import { ChatForm } from "@/components/chat/ChatForm";
+import { getAllChatMessages } from "@/lib/actions/chat";
 
-export default function HomePage() {
-  return <ChatForm />;
+export default async function HomePage() {
+  const messages = await getAllChatMessages();
+  return <ChatForm messages={messages} />;
 }

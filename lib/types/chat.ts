@@ -13,28 +13,14 @@ export function isFileType(value: string): value is FileType {
 export interface FileAttachment {
   readonly file_name: string;
   readonly file_type: FileType;
-  readonly data: JsonValue;
+  readonly data: string;
+  readonly chat_message_id: number;
 }
-
-// Type to represent any valid JSON value
-export type JsonValue =
-  | string
-  | number
-  | boolean
-  | null
-  | JsonValue[]
-  | { [key: string]: JsonValue };
 
 export interface ChatMessage {
+  readonly id: number;
   readonly role: ChatRole;
   readonly content: string;
-  readonly attachments: readonly FileAttachment[];
+  attachments: readonly FileAttachment[];
   readonly timestamp: number;
-}
-
-export interface PartialChatMessage {
-  readonly role?: ChatRole;
-  readonly content?: string;
-  readonly file_paths?: readonly (string | null)[];
-  readonly timestamp?: number;
 }

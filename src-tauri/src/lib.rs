@@ -24,8 +24,7 @@ pub fn run() {
     );
 
     builder = builder.invoke_handler(tauri::generate_handler![
-        handlers::chat::create_chat_message,
-        handlers::chat::update_chat_message,
+        crate::handlers::parsers::parse_csv,
     ]);
 
     builder
