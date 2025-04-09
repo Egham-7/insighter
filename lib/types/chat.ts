@@ -1,4 +1,4 @@
-import { invoke } from "@tauri-apps/api/tauri";
+import { invoke } from "@tauri-apps/api/core";
 
 // Literal type for roles to prevent arbitrary strings
 export type ChatRole = "user" | "assistant" | "system";
