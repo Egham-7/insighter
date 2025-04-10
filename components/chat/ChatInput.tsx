@@ -94,10 +94,15 @@ export function ChatInput() {
     return Promise.all(
       files.map(async (file) => {
         const data = await parseFile(file.path);
+        const fileExtension = file.name.split(".").pop()?.toLowerCase();
+        const fileTypeEnum =
+          Object.values(FileType).find(
+            (type) => type.toLowerCase() === fileExtension,
+          ) || FileType.CSV;
 
         return {
           file_name: file.name,
-          file_type: FileType.CSV,
+          file_type: fileTypeEnum,
           data: JSON.stringify(data),
           chat_message_id: messageId,
         };
