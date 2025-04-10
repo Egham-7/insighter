@@ -2,6 +2,12 @@ import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { FileWithPath } from "./ChatInput";
 import { FaFileCsv, FaFilePdf, FaFile } from "react-icons/fa";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface FileAttachmentsProps {
   files: FileWithPath[];
@@ -13,7 +19,6 @@ export function FileAttachments({ files, onRemoveFile }: FileAttachmentsProps) {
 
   const getFileIcon = (fileName: string) => {
     const extension = fileName.split(".").pop()?.toLowerCase();
-
     switch (extension) {
       case "csv":
         return <FaFileCsv className="h-8 w-8 text-green-600" />;
@@ -28,9 +33,18 @@ export function FileAttachments({ files, onRemoveFile }: FileAttachmentsProps) {
     <div className="mb-4 flex flex-wrap gap-2">
       {files.map((file, i) => (
         <div key={i} className="relative rounded-lg border bg-muted/30 p-2">
-          <div className="relative h-16 w-16 overflow-hidden rounded-lg flex items-center justify-center">
-            {getFileIcon(file.name)}
-          </div>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="relative h-16 w-16 overflow-hidden rounded-lg flex flex-col items-center justify-center">
+                  {getFileIcon(file.name)}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{file.name}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <Button
             type="button"
             onClick={() => onRemoveFile(i)}
