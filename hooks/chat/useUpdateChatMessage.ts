@@ -2,13 +2,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useMutation } from "@tanstack/react-query";
 import { ChatMessage } from "@/lib/types/chat";
 import { useDatabase } from "../use-db";
+import { toast } from "sonner";
 
 export const useUpdateChatMessage = () => {
   const queryClient = useQueryClient();
-
   const { db, error, loading } = useDatabase();
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: async ({
       id,
       updates,
@@ -22,21 +22,21 @@ export const useUpdateChatMessage = () => {
       if (error) {
         throw new Error("Error loading database");
       }
-
       if (!db) {
         throw new Error("Database not initialized");
       }
+
       // Get the current message from the cache
       let message = queryClient.getQueryData<ChatMessage>(["message", id]);
-
       if (!message) {
-        message = (await db.select("SELECT * FROM chat_messages WHERE id = ?", [
-          id,
-        ])) as ChatMessage;
-      }
-
-      if (!message) {
-        throw new Error("Message not found");
+        const messages = (await db.select(
+          "SELECT * FROM chat_messages WHERE id = ?",
+          [id],
+        )) as ChatMessage[];
+        if (!messages || messages.length === 0) {
+          throw new Error("Message not found");
+        }
+        message = messages[0] as ChatMessage;
       }
 
       // Create updated message by merging current message with updates
@@ -80,9 +80,22 @@ export const useUpdateChatMessage = () => {
 
       return updatedMessage;
     },
-    onSuccess: ({ id }) => {
-      queryClient.invalidateQueries({ queryKey: ["message", id] });
+    onSuccess: (updatedMessage) => {
+      queryClient.invalidateQueries({
+        queryKey: ["message", updatedMessage.id],
+      });
       queryClient.invalidateQueries({ queryKey: ["messages"] });
+      toast.success("Message updated successfully");
+    },
+    onError: (error, variables) => {
+      toast.error(`Failed to update message: ${error.message}`, {
+        action: {
+          label: "Retry",
+          onClick: () => mutation.mutate(variables),
+        },
+      });
     },
   });
+
+  return mutation;
 };
