@@ -1,22 +1,20 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChatMessage } from "@/lib/types/chat";
 import { useDatabase } from "../use-db";
+import { toast } from "sonner";
 
 export const useCreateChatMessage = () => {
   const queryClient = useQueryClient();
-
   const { db, loading, error } = useDatabase();
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: async (newMessage: Omit<ChatMessage, "id">) => {
       if (loading) {
         throw new Error("Database is loading");
       }
-
       if (error) {
         throw new Error("Error loading database");
       }
-
       if (!db) {
         throw new Error("Database not initialized");
       }
@@ -59,6 +57,18 @@ export const useCreateChatMessage = () => {
       // Invalidate relevant queries to refresh the data
       queryClient.invalidateQueries({ queryKey: ["messages"] });
       queryClient.invalidateQueries({ queryKey: ["message", data.id] });
+      toast.success("Message created successfully");
+    },
+    onError: (error) => {
+      toast.error(`Failed to create message: ${error.message}`, {
+        action: {
+          label: "Retry",
+          onClick: () =>
+            mutation.mutate(mutation.variables as Omit<ChatMessage, "id">),
+        },
+      });
     },
   });
+
+  return mutation;
 };
