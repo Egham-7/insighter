@@ -6,6 +6,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 export default function HomePage() {
   const { data: messages, isLoading, isError } = useGetAllChatMessages();
+  console.log(messages);
 
   if (isLoading) {
     return (
