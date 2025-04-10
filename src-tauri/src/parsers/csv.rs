@@ -1,17 +1,24 @@
 use super::{FileParser, ParsedData};
-use crate::models::chat::FileAttachment;
+use std::io::Read;
 use std::path::{Path, PathBuf};
 
 #[derive(Debug, Default)]
 pub struct CsvParser;
 
 impl FileParser for CsvParser {
-    type Output = FileAttachment;
+    type Output = serde_json::Value;
 
     fn parse(&self, path: PathBuf) -> Result<ParsedData<Self::Output>, Box<dyn std::error::Error>> {
-        let reader = csv::Reader::from_path(&path)?;
+        // Read file contents
+        let mut file = std::fs::File::open(&path)?;
+        let mut contents = String::new();
+        file.read_to_string(&mut contents)?;
+
+        // Parse the contents using a reader from the string
+        let mut reader = csv::Reader::from_reader(contents.as_bytes());
+
         let csv_data: Vec<serde_json::Value> =
-            reader.into_deserialize().collect::<Result<Vec<_>, _>>()?;
+            reader.deserialize().collect::<Result<Vec<_>, _>>()?;
 
         let file_name = path
             .file_name()
@@ -19,14 +26,9 @@ impl FileParser for CsvParser {
             .unwrap_or_default()
             .to_string();
 
-        let attachment = FileAttachment::new(
-            file_name.clone(),
-            "csv".to_string(),
-            serde_json::Value::Array(csv_data),
-            path,
-        );
+        let json_data = serde_json::Value::Array(csv_data);
 
-        Ok(ParsedData::new(vec![attachment], file_name))
+        Ok(ParsedData::new(vec![json_data], file_name))
     }
 
     fn validate(&self, path: &Path) -> bool {
