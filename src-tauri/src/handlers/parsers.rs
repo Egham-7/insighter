@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 #[tauri::command]
 pub fn parse_csv(file_path: String) -> Result<serde_json::Value, String> {
-    let parser = CsvParser;
+    let parser = CsvParser::new();
     let path = PathBuf::from(file_path);
 
     if !parser.validate(&path) {
