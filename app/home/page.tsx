@@ -4,6 +4,7 @@ import { ChatForm } from "@/components/chat/ChatForm";
 import { useGetAllChatMessages } from "@/hooks/chat/useGetChatMessages";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useState, useRef, useEffect } from "react";
+import { Results } from "@/components/chat_results/Results";
 
 export default function HomePage() {
   const { data: messages, isLoading, isError } = useGetAllChatMessages();
@@ -102,7 +103,7 @@ export default function HomePage() {
 
       {/* Right half - Empty div */}
       <div className="h-full bg-gray-50" style={{ width: `${rightWidth}%` }}>
-        {/* This div is intentionally left empty */}
+        <Results />
       </div>
     </div>
   );
