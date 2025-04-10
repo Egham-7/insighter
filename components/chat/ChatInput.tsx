@@ -154,6 +154,8 @@ export function ChatInput() {
           toast.dismiss(loadingToast);
           toast.success(`${attachments.length} file(s) attached successfully`);
         } catch (error) {
+          await deleteChatMessage(chatMessage.id);
+
           toast.dismiss(loadingToast);
           toast.error("Error processing files", {
             description:
@@ -161,8 +163,6 @@ export function ChatInput() {
                 ? error.message
                 : "Failed to process attached files",
           });
-
-          await deleteChatMessage(chatMessage.id);
         } finally {
           setIsProcessing(false);
         }
