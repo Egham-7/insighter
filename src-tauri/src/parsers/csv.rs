@@ -26,9 +26,7 @@ impl FileParser for CsvParser {
             .unwrap_or_default()
             .to_string();
 
-        let json_data = serde_json::Value::Array(csv_data);
-
-        Ok(ParsedData::new(vec![json_data], file_name))
+        Ok(ParsedData::new(vec![csv_data], file_name))
     }
 
     fn validate(&self, path: &Path) -> bool {
