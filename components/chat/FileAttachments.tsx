@@ -30,11 +30,6 @@ export function FileAttachments({ files, onRemoveFile }: FileAttachmentsProps) {
         <div key={i} className="relative rounded-lg border bg-muted/30 p-2">
           <div className="relative h-16 w-16 overflow-hidden rounded-lg flex items-center justify-center">
             {getFileIcon(file.name)}
-            <span className="text-xs mt-2 block truncate max-w-full text-center">
-              {file.name.length > 10
-                ? `${file.name.substring(0, 10)}...`
-                : file.name}
-            </span>
           </div>
           <Button
             type="button"
