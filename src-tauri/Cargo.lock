@@ -111,6 +111,7 @@ dependencies = [
  "tauri-plugin-http",
  "tauri-plugin-log",
  "tauri-plugin-sql",
+ "thiserror 2.0.12",
 ]
 
 [[package]]
