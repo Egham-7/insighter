@@ -26,7 +26,7 @@ pub fn run() {
     );
 
     builder = builder.invoke_handler(tauri::generate_handler![
-        crate::handlers::parsers::parse_csv,
+        crate::handlers::parsers::parse_file,
     ]);
 
     builder
