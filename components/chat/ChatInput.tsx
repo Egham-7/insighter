@@ -15,7 +15,7 @@ import { AutoResizeTextarea } from "../AutoResizeTextArea";
 import { useState } from "react";
 import { FileAttachments } from "./FileAttachments";
 import { useCreateChatMessage } from "@/hooks/chat/useCreateChatMessage";
-import useParseCsv from "@/hooks/parsers/useParseCsv";
+import useParseFile from "@/hooks/parsers/useParseFile";
 import { FileAttachment, FileType } from "@/lib/types/chat";
 import { useUpdateChatMessage } from "@/hooks/chat/useUpdateChatMessage";
 import { toast } from "sonner";
@@ -31,6 +31,8 @@ export type FileWithPath = {
   data?: ArrayBuffer;
 };
 
+const ALLOWED_FILE_TYPES = [".csv", ".pdf"];
+
 export function ChatInput() {
   const [attachedFiles, setAttachedFiles] = useState<FileWithPath[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -44,18 +46,23 @@ export function ChatInput() {
 
   const isSubmitting = form.formState.isSubmitting || isProcessing;
   const { mutateAsync: createChatMessage } = useCreateChatMessage();
-  const { mutateAsync: parseCsv } = useParseCsv();
+  const { mutateAsync: parseFile } = useParseFile();
   const { mutateAsync: updateChatMessage } = useUpdateChatMessage();
 
   const validateFiles = (files: FileWithPath[]): boolean => {
-    return files.every((file) => file.name.endsWith(".csv"));
+    return files.every((file) =>
+      ALLOWED_FILE_TYPES.some((type) => file.name.endsWith(type)),
+    );
   };
 
   const handleOpenFilePicker = async () => {
     try {
       const selected = await open({
         multiple: true,
-        filters: [{ name: "CSV", extensions: ["csv"] }],
+        filters: [
+          { name: "CSV", extensions: ["csv"] },
+          { name: "PDF", extensions: ["pdf"] },
+        ],
       });
 
       if (selected === null) {
@@ -86,24 +93,19 @@ export function ChatInput() {
   ): Promise<FileAttachment[]> {
     return Promise.all(
       files.map(async (file) => {
-        try {
-          console.log(`Processing CSV file: ${file.name}`);
+        const data = await parseFile(file.path);
+        const fileExtension = file.name.split(".").pop()?.toLowerCase();
+        const fileTypeEnum =
+          Object.values(FileType).find(
+            (type) => type.toLowerCase() === fileExtension,
+          ) || FileType.CSV;
 
-          const data = await parseCsv(file.path);
-          console.log(`Parsed data from ${file.name}:`, data);
-
-          return {
-            file_name: file.name,
-            file_type: FileType.CSV,
-            data: JSON.stringify(data),
-            chat_message_id: messageId,
-          };
-        } catch (error) {
-          console.error(`Error processing CSV file ${file.name}:`, error);
-          throw new Error(
-            `Failed to process ${file.name}. Please ensure it's a valid CSV file.`,
-          );
-        }
+        return {
+          file_name: file.name,
+          file_type: fileTypeEnum,
+          data: JSON.stringify(data),
+          chat_message_id: messageId,
+        };
       }),
     );
   }

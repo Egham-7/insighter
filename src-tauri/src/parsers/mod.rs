@@ -1,6 +1,8 @@
 pub mod csv;
+pub mod pdf;
 
 pub use csv::CsvParser;
+pub use pdf::PdfParser;
 
 use serde::Serialize;
 use std::path::{Path, PathBuf};
