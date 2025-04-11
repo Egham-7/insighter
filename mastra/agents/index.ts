@@ -6,5 +6,5 @@ export const dataAnalystAgent4o = new Agent({
   name: "DataAnalysisAgent",
   instructions:
     "You analyze business data, provide statistical insights, business insights, and make recommendations.",
-  model: openai("gpt-4o"),
+  model: openai("o1-mini"),
 });
