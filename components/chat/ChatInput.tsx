@@ -20,6 +20,7 @@ import { FileAttachment, FileType } from "@/lib/types/chat";
 import { useUpdateChatMessage } from "@/hooks/chat/useUpdateChatMessage";
 import { toast } from "sonner";
 import { open } from "@tauri-apps/plugin-dialog";
+import useDeleteChatMessage from "@/hooks/chat/useDeleteChatMessage";
 
 const formSchema = z.object({
   message: z.string().min(1, "Message is required"),
@@ -48,6 +49,7 @@ export function ChatInput() {
   const { mutateAsync: createChatMessage } = useCreateChatMessage();
   const { mutateAsync: parseFile } = useParseFile();
   const { mutateAsync: updateChatMessage } = useUpdateChatMessage();
+  const { mutateAsync: deleteChatMessage } = useDeleteChatMessage();
 
   const validateFiles = (files: FileWithPath[]): boolean => {
     return files.every((file) =>
@@ -153,21 +155,14 @@ export function ChatInput() {
           toast.dismiss(loadingToast);
           toast.success(`${attachments.length} file(s) attached successfully`);
         } catch (error) {
+          await deleteChatMessage(chatMessage.id);
+
           toast.dismiss(loadingToast);
           toast.error("Error processing files", {
             description:
               error instanceof Error
                 ? error.message
                 : "Failed to process attached files",
-          });
-
-          // Update message to indicate file processing failed
-          await updateChatMessage({
-            id: chatMessage.id,
-            updates: {
-              ...chatMessage,
-              content: values.message + "\n\n[File processing failed]",
-            },
           });
         } finally {
           setIsProcessing(false);
