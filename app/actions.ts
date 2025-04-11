@@ -1,9 +1,7 @@
 "use server";
 import { dataAnalystAgent4o } from "@/mastra/agents";
 
-export const csvAnalystStreaming = async (
-  inputData: unknown[][]
-): Promise<void> => {
+export const analyzeCsv = async (inputData: unknown[][]) => {
   try {
     const stream = await dataAnalystAgent4o.stream([
       {
@@ -14,9 +12,7 @@ export const csvAnalystStreaming = async (
       },
     ]);
 
-    for await (const chunk of stream.textStream) {
-      process.stdout.write(chunk);
-    }
+    return stream;
   } catch (error) {
     console.error("Error:", error);
   }
