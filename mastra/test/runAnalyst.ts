@@ -1,24 +1,6 @@
-// mastra/tools/dataProcessing/csvProcessor.ts
+import { csvAnalystStreaming } from "..";
 
-export function processCSVData(data: any[]): Record<string, any>[] {
-  return data.map((row) => {
-    const processedRow: Record<string, any> = {};
-    for (const [key, value] of Object.entries(row)) {
-      if (
-        typeof value === "string" &&
-        !isNaN(parseFloat(value)) &&
-        value !== ""
-      ) {
-        processedRow[key] = parseFloat(value);
-      } else {
-        processedRow[key] = value;
-      }
-    }
-    return processedRow;
-  });
-}
-
-// Sample input
+// Sample input same format as parsed csv.
 const sampleInput = [
   {
     ADR: "120",
@@ -127,6 +109,8 @@ const sampleInput = [
   },
 ];
 
-// Run the function with the sample input
-const processedData = processCSVData(sampleInput);
-console.log("Processed Data:", processedData);
+const runAnalysis = async () => {
+  await csvAnalystStreaming(sampleInput);
+};
+
+runAnalysis();
