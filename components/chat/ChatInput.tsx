@@ -53,7 +53,7 @@ export function ChatInput() {
 
   const validateFiles = (files: FileWithPath[]): boolean => {
     return files.every((file) =>
-      ALLOWED_FILE_TYPES.some((type) => file.name.endsWith(type)),
+      ALLOWED_FILE_TYPES.some((type) => file.name.endsWith(type))
     );
   };
 
@@ -91,7 +91,7 @@ export function ChatInput() {
 
   async function processFiles(
     files: FileWithPath[],
-    messageId: number,
+    messageId: number
   ): Promise<FileAttachment[]> {
     return Promise.all(
       files.map(async (file) => {
@@ -99,7 +99,7 @@ export function ChatInput() {
         const fileExtension = file.name.split(".").pop()?.toLowerCase();
         const fileTypeEnum =
           Object.values(FileType).find(
-            (type) => type.toLowerCase() === fileExtension,
+            (type) => type.toLowerCase() === fileExtension
           ) || FileType.CSV;
 
         return {
@@ -108,7 +108,7 @@ export function ChatInput() {
           data: JSON.stringify(data),
           chat_message_id: messageId,
         };
-      }),
+      })
     );
   }
 
@@ -142,7 +142,7 @@ export function ChatInput() {
         try {
           const attachments = await processFiles(
             filesToProcess,
-            chatMessage.id,
+            chatMessage.id
           );
 
           // Update message with attachments
