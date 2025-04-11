@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -8,12 +6,27 @@ import { Button } from "@/components/ui/button";
 import { Edit, Trash2 } from "lucide-react";
 import { EditMessageForm } from "./EditMessageForm";
 import useDeleteChatMessage from "@/hooks/chat/useDeleteChatMessage";
-
 interface ChatMessageProps {
   message: Partial<ChatMessageType>;
+  complete: (
+    prompt: string,
+    options?:
+      | {
+          /**
+  An optional object of headers to be passed to the API endpoint.
+   */
+          headers?: Record<string, string> | Headers;
+          /**
+  An optional object to be passed to the API endpoint.
+     */
+          body?: object;
+        }
+      | undefined,
+  ) => Promise<string | null | undefined>;
+  messages: ChatMessageType[];
 }
 
-export function ChatMessage({ message }: ChatMessageProps) {
+export function ChatMessage({ message, complete, messages }: ChatMessageProps) {
   const [isEditing, setIsEditing] = useState(false);
 
   const { mutateAsync: deleteChatMessage } = useDeleteChatMessage();
@@ -28,6 +41,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
         message={message}
         onCancel={() => setIsEditing(false)}
         onSave={() => setIsEditing(false)}
+        complete={complete}
       />
     );
   }

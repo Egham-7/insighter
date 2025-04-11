@@ -9,12 +9,28 @@ interface EditMessageFormProps {
   message: Partial<ChatMessageType>;
   onCancel: () => void;
   onSave: () => void;
+  complete: (
+    prompt: string,
+    options?:
+      | {
+          /**
+  An optional object of headers to be passed to the API endpoint.
+   */
+          headers?: Record<string, string> | Headers;
+          /**
+  An optional object to be passed to the API endpoint.
+     */
+          body?: object;
+        }
+      | undefined,
+  ) => Promise<string | null | undefined>;
 }
 
 export function EditMessageForm({
   message,
   onCancel,
   onSave,
+  complete,
 }: EditMessageFormProps) {
   const [content, setContent] = useState(message.content || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,6 +48,7 @@ export function EditMessageForm({
         id: message.id,
         updates: { ...message, content },
       });
+      complete(content);
       onSave();
     } catch (error) {
       console.error("Failed to update message:", error);

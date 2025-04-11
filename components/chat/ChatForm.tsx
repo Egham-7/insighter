@@ -16,6 +16,8 @@ import useDeleteChatMessage from "@/hooks/chat/useDeleteChatMessage";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Form } from "@/components/ui/form";
+import { useCompletion } from "@ai-sdk/react";
+import { ChatHeader } from "./ChatHeader";
 
 const formSchema = z.object({
   message: z.string().min(1, "Message is required"),
@@ -42,6 +44,30 @@ export function ChatForm({
   const { mutateAsync: updateChatMessage } = useUpdateChatMessage();
   const { mutateAsync: deleteChatMessage } = useDeleteChatMessage();
 
+  const {
+    completion,
+    complete,
+    isLoading: isAnalyzing,
+    setCompletion,
+  } = useCompletion({
+    api: "/api/chat",
+    onFinish: async (_prompt: string, completion) => {
+      await createChatMessage({
+        role: "assistant",
+        content: completion,
+        timestamp: Date.now(),
+      });
+      setCompletion("");
+    },
+    onError: (error) => {
+      toast.error("Error analyzing data", {
+        description: error.message || "Unknown error",
+      });
+    },
+  });
+
+  console.log("completion", completion);
+
   async function processFiles(
     files: FileWithPath[],
     messageId: number,
@@ -65,56 +91,83 @@ export function ChatForm({
     );
   }
 
-  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+  async function handleFileProcessing(
+    files: FileWithPath[],
+    messageId: number,
+  ) {
+    const loadingToast = toast.loading("Processing attached files...");
+
     try {
-      // Create message first
+      const attachments = await processFiles(files, messageId);
+
+      // Update message with attachments
+      await updateChatMessage({
+        id: messageId,
+        updates: { id: messageId, attachments },
+      });
+
+      toast.dismiss(loadingToast);
+      toast.success(`${attachments.length} file(s) attached successfully`);
+
+      return attachments;
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      toast.error("Error processing files", {
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to process attached files",
+      });
+      throw error; // Re-throw to handle in the calling function
+    }
+  }
+
+  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+    let userMessageId: number | null = null;
+
+    try {
+      // Create user message
       const chatMessage = await createChatMessage({
         role: "user",
         content: values.message,
         timestamp: Date.now(),
       });
 
-      // Reset form immediately to improve perceived performance
+      userMessageId = chatMessage.id;
+
+      // Reset form immediately
       form.reset();
 
       // Process files if there are any
-      if (attachedFiles.length > 0) {
-        const filesToProcess = [...attachedFiles]; // Create a copy before clearing
-        setAttachedFiles([]);
+      const filesToProcess = [...attachedFiles];
+      setAttachedFiles([]);
 
-        const loadingToast = toast.loading("Processing attached files...");
+      const attachments = await handleFileProcessing(
+        filesToProcess,
+        chatMessage.id,
+      );
+      const dataAttachments = attachments.map((att) => att.data);
 
-        try {
-          const attachments = await processFiles(
-            filesToProcess,
-            chatMessage.id,
-          );
-
-          // Update message with attachments
-          await updateChatMessage({
-            id: chatMessage.id,
-            updates: { ...chatMessage, attachments },
-          });
-
-          toast.dismiss(loadingToast);
-          toast.success(`${attachments.length} file(s) attached successfully`);
-        } catch (error) {
-          await deleteChatMessage(chatMessage.id);
-
-          toast.dismiss(loadingToast);
-          toast.error("Error processing files", {
-            description:
-              error instanceof Error
-                ? error.message
-                : "Failed to process attached files",
-          });
-        }
-      }
+      // Start the completion with the data attachments
+      await complete("Analyze this data and provide insights", {
+        body: {
+          inputData: dataAttachments,
+          messages: messages,
+          prompt: values.message,
+        },
+      });
     } catch (error) {
+      console.error("Error in submission:", error);
+
+      // Clean up the user message if it was created but processing failed
+      if (userMessageId) {
+        await deleteChatMessage(userMessageId).catch(console.error);
+      }
+
       toast.error("Error sending message", {
         description: "Failed to send your message. Please try again.",
+        dismissible: true,
       });
-      console.error("Error sending message:", error);
     }
   };
 
@@ -142,13 +195,18 @@ export function ChatForm({
         )}
         {...props}
       >
-        <ChatMessageList messages={messages} />
+        <ChatHeader />
+        <ChatMessageList
+          messages={messages}
+          streamingMessage={completion}
+          complete={complete}
+        />
 
         <Form {...form}>
           <ChatInput
             form={form}
             onSubmit={handleSubmit}
-            isSubmitting={isSubmitting}
+            isSubmitting={isSubmitting || isAnalyzing}
             attachedFiles={attachedFiles}
             onAddFiles={addFiles}
             onRemoveFile={removeFile}
