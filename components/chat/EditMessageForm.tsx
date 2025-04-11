@@ -48,7 +48,9 @@ export function EditMessageForm({
         id: message.id,
         updates: { ...message, content },
       });
-      complete(content);
+      complete(content, {
+        body: { inputData: message.attachments },
+      });
       onSave();
     } catch (error) {
       console.error("Failed to update message:", error);

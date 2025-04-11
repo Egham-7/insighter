@@ -31,7 +31,6 @@ export function ChatMessageList({
       <div className="mx-auto max-w-3xl">
         {messages.map((message) => (
           <ChatMessageComponent
-            messages={messages}
             complete={complete}
             key={message.id}
             message={message}
