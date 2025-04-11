@@ -20,7 +20,7 @@ export const csvAnalystStreaming = async (
     const stream = await myAgent.stream([
       {
         role: "user",
-        content: `From this data: ${JSON.stringify(
+        content: `From this dataset: ${JSON.stringify(
           inputData
         )}. Please analyze the data and provide statistical insights, and make recommendations.`,
       },
