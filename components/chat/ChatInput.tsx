@@ -96,7 +96,6 @@ export function ChatInput() {
     return Promise.all(
       files.map(async (file) => {
         const data = await parseFile(file.path);
-        console.log(data);
         const fileExtension = file.name.split(".").pop()?.toLowerCase();
         const fileTypeEnum =
           Object.values(FileType).find(
