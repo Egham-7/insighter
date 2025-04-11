@@ -14,7 +14,6 @@ export const csvAnalystStreaming = async (
       },
     ]);
 
-    console.log("Agent:");
     for await (const chunk of stream.textStream) {
       process.stdout.write(chunk);
     }
