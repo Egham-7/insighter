@@ -10,12 +10,6 @@ export const useCreateChat = () => {
 
   const mutation = useMutation({
     mutationFn: async (newChat: Omit<Chat, "id">) => {
-      if (loading) {
-        throw new Error("Database is loading");
-      }
-      if (error) {
-        throw new Error("Error loading database");
-      }
       if (!db) {
         throw new Error("Database not initialized");
       }
@@ -56,6 +50,20 @@ export const useCreateChat = () => {
       });
     },
   });
+
+  // Return null mutation when database is not ready
+  if (loading || error || !db) {
+    return {
+      ...mutation,
+      mutate: () => {
+        toast.error(
+          error?.message || "Database not ready. Please try again in a moment.",
+        );
+        return Promise.reject(new Error("Database not ready"));
+      },
+      mutateAsync: () => Promise.reject(new Error("Database not ready")),
+    };
+  }
 
   return mutation;
 };

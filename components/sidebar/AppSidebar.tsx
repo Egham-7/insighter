@@ -59,7 +59,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: MessageSquare,
         isActive: true,
         items: chats.map((chat) => ({
-          title: chat.title || `Chat ${chat.id}`,
+          id: chat.id,
+          title: chat.title,
           url: `/home/chat/${chat.id}`,
         })),
       },
