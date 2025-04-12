@@ -40,9 +40,7 @@ export function ChatMessageList({
           />
         ))}
 
-        {streamingMessage != "" && (
-          <StreamingMessage content={streamingMessage} />
-        )}
+        <StreamingMessage content={streamingMessage} isLoading={isAnalyzing} />
       </div>
     </div>
   );
