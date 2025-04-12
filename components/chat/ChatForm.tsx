@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import type { ChatMessage, FileAttachment } from "@/lib/types/chat";
+import type { FileAttachment } from "@/lib/types/chat";
 import { FileType } from "@/lib/types/chat";
 import { ChatMessageList } from "./ChatMessageList";
 import { ChatInput, FileWithPath } from "./ChatInput";
@@ -13,11 +13,13 @@ import { useCreateChatMessage } from "@/hooks/chat/useCreateChatMessage";
 import useParseFile from "@/hooks/parsers/useParseFile";
 import { useUpdateChatMessage } from "@/hooks/chat/useUpdateChatMessage";
 import useDeleteChatMessage from "@/hooks/chat/useDeleteChatMessage";
+import { useGetChatMessages } from "@/hooks/chat/useGetChatMessages";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Form } from "@/components/ui/form";
 import { useCompletion } from "@ai-sdk/react";
 import { ChatHeader } from "./ChatHeader";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 const formSchema = z.object({
   message: z.string().min(1, "Message is required"),
@@ -25,10 +27,11 @@ const formSchema = z.object({
 
 export function ChatForm({
   className,
-  messages,
+  chatId,
   ...props
-}: React.ComponentProps<"div"> & { messages: ChatMessage[] }) {
+}: React.ComponentProps<"div"> & { chatId: number }) {
   const [attachedFiles, setAttachedFiles] = useState<FileWithPath[]>([]);
+  const { data: messages, isLoading, isError } = useGetChatMessages(chatId);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -56,6 +59,7 @@ export function ChatForm({
         role: "assistant",
         content: completion,
         timestamp: Date.now(),
+        chat_id: chatId,
       });
       setCompletion("");
     },
@@ -86,6 +90,7 @@ export function ChatForm({
           file_type: fileTypeEnum,
           data: JSON.stringify(data),
           chat_message_id: messageId,
+          id: 0,
         };
       }),
     );
@@ -131,6 +136,7 @@ export function ChatForm({
         role: "user",
         content: values.message,
         timestamp: Date.now(),
+        chat_id: chatId,
       });
 
       userMessageId = chatMessage.id;
@@ -186,6 +192,37 @@ export function ChatForm({
     setAttachedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex flex-col justify-center items-center h-screen w-full">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary mb-4"></div>
+        <p className="text-muted-foreground">Loading messages...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-6 max-w-md mx-auto mt-8 w-full">
+        <Alert variant="destructive">
+          <AlertTitle className="text-destructive font-medium">
+            Error loading messages
+          </AlertTitle>
+          <AlertDescription className="mt-2">
+            We couldn&apos;t load your chat messages. Please try refreshing the
+            page or check your connection.
+          </AlertDescription>
+        </Alert>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+        >
+          Try again
+        </button>
+      </div>
+    );
+  }
+
   return (
     <TooltipProvider>
       <main
@@ -197,7 +234,7 @@ export function ChatForm({
       >
         <ChatHeader />
         <ChatMessageList
-          messages={messages}
+          messages={messages ?? []}
           streamingMessage={completion}
           complete={complete}
         />

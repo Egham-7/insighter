@@ -18,10 +18,20 @@ const useClearAllChatMessages = () => {
       if (!db) {
         throw new Error("Database not initialized");
       }
-      return await db.execute("DELETE FROM chat_messages");
+
+      // Delete file attachments first due to foreign key constraints
+      await db.execute("DELETE FROM file_attachments");
+
+      // Delete all chat messages
+      await db.execute("DELETE FROM chat_messages");
+
+      return true;
     },
     onSuccess: () => {
+      // Invalidate all relevant queries
       queryClient.invalidateQueries({ queryKey: ["messages"] });
+      queryClient.invalidateQueries({ queryKey: ["attachments"] });
+
       toast.success("All chat messages cleared");
     },
     onError: (error) => {

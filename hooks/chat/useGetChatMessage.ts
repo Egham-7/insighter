@@ -22,23 +22,34 @@ export function useGetMessage(id: number) {
       if (!db) {
         throw new Error("Database not initialized");
       }
+
       const messageResult = (await db.select(
-        "SELECT id, role, content, timestamp FROM chat_messages WHERE id = ?",
+        "SELECT id, chat_id, role, content, timestamp FROM chat_messages WHERE id = ?",
         [id],
       )) as ChatMessage[];
 
+      if (messageResult.length === 0) {
+        throw new Error("Message not found");
+      }
+
       const attachmentsResult = (await db.select(
-        "SELECT file_name, file_type, data FROM file_attachments WHERE chat_message_id = ?",
+        "SELECT id, file_name, file_type, data FROM file_attachments WHERE chat_message_id = ?",
         [id],
       )) as FileAttachment[];
 
       const message = messageResult[0];
+
+      // Attach the file attachments to the message
       message.attachments = attachmentsResult.map((att) => ({
-        ...att,
-        data: JSON.parse(att.data as string),
+        chat_message_id: att.chat_message_id,
+        id: att.id,
+        file_name: att.file_name,
+        file_type: att.file_type,
+        data: att.data,
       }));
 
       return message;
     },
+    enabled: !!db && !loading && id !== undefined,
   });
 }

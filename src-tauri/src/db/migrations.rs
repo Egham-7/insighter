@@ -9,7 +9,8 @@ pub fn get_migrations() -> Vec<Migration> {
                 CREATE TABLE chats (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     title TEXT NOT NULL,
-                    created_at INTEGER NOT NULL
+                    created_at INTEGER NOT NULL,
+                    user_id TEXT NOT NULL
                 );"#,
             kind: MigrationKind::Up,
         },

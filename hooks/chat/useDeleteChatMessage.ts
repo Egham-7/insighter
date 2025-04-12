@@ -21,9 +21,9 @@ const useDeleteChatMessage = () => {
       }
 
       try {
-        // First, get the timestamp of the message to be deleted
+        // First, get the chat_id and timestamp of the message to be deleted
         const messageData = (await db.select(
-          "SELECT timestamp FROM chat_messages WHERE id = ?",
+          "SELECT chat_id, timestamp FROM chat_messages WHERE id = ?",
           [id],
         )) as ChatMessage[];
 
@@ -31,21 +31,38 @@ const useDeleteChatMessage = () => {
           throw new Error("Message not found");
         }
 
+        const chatId = messageData[0].chat_id;
         const messageTimestamp = messageData[0].timestamp;
 
-        // Delete the message and all messages created after it
-        await db.execute("DELETE FROM chat_messages WHERE timestamp >= ?", [
-          messageTimestamp,
-        ]);
+        // Get all message IDs that will be deleted to handle attachments
+        const messagesToDelete = (await db.select(
+          "SELECT id FROM chat_messages WHERE chat_id = ? AND timestamp >= ?",
+          [chatId, messageTimestamp],
+        )) as { id: number }[];
 
-        return id;
+        // Delete attachments for all messages that will be deleted
+        for (const message of messagesToDelete) {
+          await db.execute(
+            "DELETE FROM file_attachments WHERE chat_message_id = ?",
+            [message.id],
+          );
+        }
+
+        // Delete the message and all messages created after it in the same chat
+        await db.execute(
+          "DELETE FROM chat_messages WHERE chat_id = ? AND timestamp >= ?",
+          [chatId, messageTimestamp],
+        );
+
+        return { id, chatId };
       } catch (error) {
         throw error;
       }
     },
-    onSuccess: (id) => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["messages"] });
-      queryClient.invalidateQueries({ queryKey: ["message", id] });
+      queryClient.invalidateQueries({ queryKey: ["messages", data.chatId] });
+      queryClient.invalidateQueries({ queryKey: ["message", data.id] });
       toast.success("Message and subsequent responses deleted");
     },
     onError: (error, id) => {

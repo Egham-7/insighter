@@ -46,20 +46,38 @@ export const useUpdateChatMessage = () => {
       };
 
       try {
-        // First, get the timestamp of the message to be updated
+        // First, get the chat_id and timestamp of the message to be updated
         const messageData = (await db.select(
-          "SELECT timestamp FROM chat_messages WHERE id = ?",
+          "SELECT chat_id, timestamp FROM chat_messages WHERE id = ?",
           [id],
         )) as ChatMessage[];
 
-        if (messageData && messageData.length > 0) {
-          const messageTimestamp = messageData[0].timestamp;
-
-          // Delete all messages created after this one, but not this one itself
-          await db.execute("DELETE FROM chat_messages WHERE timestamp > ?", [
-            messageTimestamp,
-          ]);
+        if (!messageData || messageData.length === 0) {
+          throw new Error("Message not found");
         }
+
+        const chatId = messageData[0].chat_id;
+        const messageTimestamp = messageData[0].timestamp;
+
+        // Get all message IDs that will be deleted to handle attachments
+        const messagesToDelete = (await db.select(
+          "SELECT id FROM chat_messages WHERE chat_id = ? AND timestamp > ?",
+          [chatId, messageTimestamp],
+        )) as { id: number }[];
+
+        // Delete attachments for all messages that will be deleted
+        for (const message of messagesToDelete) {
+          await db.execute(
+            "DELETE FROM file_attachments WHERE chat_message_id = ?",
+            [message.id],
+          );
+        }
+
+        // Delete all messages created after this one in the same chat, but not this one itself
+        await db.execute(
+          "DELETE FROM chat_messages WHERE chat_id = ? AND timestamp > ?",
+          [chatId, messageTimestamp],
+        );
 
         // Update the message in the database
         await db.execute(
@@ -88,7 +106,7 @@ export const useUpdateChatMessage = () => {
                 updatedMessage.id,
                 attachment.file_name,
                 attachment.file_type,
-                JSON.stringify(attachment.data),
+                attachment.data,
               ],
             );
           }
@@ -102,6 +120,9 @@ export const useUpdateChatMessage = () => {
     onSuccess: (updatedMessage) => {
       queryClient.invalidateQueries({
         queryKey: ["message", updatedMessage.id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["messages", updatedMessage.chat_id],
       });
       queryClient.invalidateQueries({ queryKey: ["messages"] });
       toast.success("Message updated and subsequent responses removed");
