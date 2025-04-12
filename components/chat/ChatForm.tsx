@@ -164,7 +164,7 @@ export function ChatForm({
       // Start the completion with the data attachments
       await complete("Analyze this data and provide insights", {
         body: {
-          inputData: dataAttachments,
+          inputData: dataAttachments.length > 0 ? dataAttachments : null,
           prompt: values.message,
           resourceId: user.id,
           threadId: chatId,
@@ -239,7 +239,7 @@ export function ChatForm({
     <TooltipProvider>
       <main
         className={cn(
-          "flex h-svh max-h-svh w-full flex-col items-stretch bg-background",
+          "flex w-full flex-col items-stretch bg-background",
           className,
         )}
         {...props}
@@ -249,6 +249,7 @@ export function ChatForm({
           messages={messages ?? []}
           streamingMessage={completion}
           complete={complete}
+          isAnalyzing={isAnalyzing}
         />
 
         <Form {...form}>

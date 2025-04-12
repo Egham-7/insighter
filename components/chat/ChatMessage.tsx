@@ -26,6 +26,7 @@ interface ChatMessageProps {
         }
       | undefined,
   ) => Promise<string | null | undefined>;
+  isAnalyzing: boolean;
 }
 
 // Message Action Buttons Component
@@ -35,12 +36,14 @@ function MessageActions({
   onEdit,
   onDelete,
   onRetry,
+  isLoading,
 }: {
   messageId: number;
   messageContent: string;
   onEdit: () => void;
   onDelete: (id: number) => Promise<void>;
   onRetry: (content: string) => void;
+  isLoading: boolean;
 }) {
   return (
     <div className="mt-2 flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
@@ -51,8 +54,10 @@ function MessageActions({
           className="h-7 w-7 rounded-full"
           onClick={() => onRetry(messageContent)}
           title="Retry"
+          disabled={isLoading}
         >
-          <RotateCcw size={14} />
+          <RotateCcw size={14} className={cn(isLoading && "animate-spin")} />
+
           <span className="sr-only">Retry message</span>
         </Button>
         <Button
@@ -61,6 +66,7 @@ function MessageActions({
           className="h-7 w-7 rounded-full"
           onClick={onEdit}
           title="Edit"
+          disabled={isLoading}
         >
           <Edit size={14} />
           <span className="sr-only">Edit message</span>
@@ -71,6 +77,7 @@ function MessageActions({
           className="h-7 w-7 rounded-full text-destructive hover:text-destructive/90"
           onClick={() => onDelete(messageId)}
           title="Delete"
+          disabled={isLoading}
         >
           <Trash2 size={14} />
           <span className="sr-only">Delete message</span>
@@ -80,11 +87,21 @@ function MessageActions({
   );
 }
 
-export function ChatMessage({ message, complete }: ChatMessageProps) {
+export function ChatMessage({
+  message,
+  complete,
+  isAnalyzing,
+}: ChatMessageProps) {
   if (message.role === "assistant") {
     return <AIMessage message={message} />;
   } else {
-    return <UserMessage message={message} complete={complete} />;
+    return (
+      <UserMessage
+        message={message}
+        complete={complete}
+        isAnalyzing={isAnalyzing}
+      />
+    );
   }
 }
 
@@ -120,13 +137,17 @@ function AIMessage({ message }: { message: ChatMessageType }) {
 function UserMessage({
   message,
   complete,
+  isAnalyzing,
 }: {
   message: ChatMessageType;
   complete: ChatMessageProps["complete"];
+  isAnalyzing: boolean;
 }) {
   const [isEditing, setIsEditing] = useState(false);
-  const { mutateAsync: deleteChatMessage } = useDeleteChatMessage();
-  const { mutateAsync: updateChatMessage } = useUpdateChatMessage();
+  const { mutateAsync: deleteChatMessage, isPending: isDeleting } =
+    useDeleteChatMessage();
+  const { mutateAsync: updateChatMessage, isPending: isUpdating } =
+    useUpdateChatMessage();
 
   const handleDelete = async (id: number) => {
     await deleteChatMessage(id);
@@ -137,6 +158,7 @@ function UserMessage({
       id: message.id,
       updates: { ...message, content },
     });
+    complete(content);
   };
 
   if (isEditing) {
@@ -149,6 +171,8 @@ function UserMessage({
       />
     );
   }
+
+  const isLoading = isAnalyzing || isUpdating || isDeleting;
 
   return (
     <div className="mb-6 flex flex-col group items-end">
@@ -184,6 +208,7 @@ function UserMessage({
           onEdit={() => setIsEditing(true)}
           onDelete={handleDelete}
           onRetry={handleRetry}
+          isLoading={isLoading}
         />
       </div>
     </div>
