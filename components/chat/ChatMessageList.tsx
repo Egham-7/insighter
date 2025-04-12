@@ -19,12 +19,14 @@ interface ChatMessageListProps {
         }
       | undefined,
   ) => Promise<string | null | undefined>;
+  isAnalyzing: boolean;
 }
 
 export function ChatMessageList({
   messages,
   streamingMessage,
   complete,
+  isAnalyzing,
 }: ChatMessageListProps) {
   return (
     <div className="flex-1 overflow-y-auto px-4 py-8">
@@ -34,12 +36,11 @@ export function ChatMessageList({
             complete={complete}
             key={message.id}
             message={message}
+            isAnalyzing={isAnalyzing}
           />
         ))}
 
-        {streamingMessage != "" && (
-          <StreamingMessage content={streamingMessage} />
-        )}
+        <StreamingMessage content={streamingMessage} isLoading={isAnalyzing} />
       </div>
     </div>
   );
