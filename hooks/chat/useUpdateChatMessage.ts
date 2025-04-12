@@ -45,47 +45,66 @@ export const useUpdateChatMessage = () => {
         ...updates,
       };
 
-      // Update the message in the database
-      await db.execute(
-        "UPDATE chat_messages SET role = ?, content = ?, timestamp = ? WHERE id = ?",
-        [
-          updatedMessage.role,
-          updatedMessage.content,
-          updatedMessage.timestamp,
-          updatedMessage.id,
-        ],
-      );
+      try {
+        // First, get the timestamp of the message to be updated
+        const messageData = (await db.select(
+          "SELECT timestamp FROM chat_messages WHERE id = ?",
+          [id],
+        )) as ChatMessage[];
 
-      // Handle attachments if they exist in the updates
-      if (updates.attachments) {
-        // Delete existing attachments
+        if (messageData && messageData.length > 0) {
+          const messageTimestamp = messageData[0].timestamp;
+
+          // Delete all messages created after this one, but not this one itself
+          await db.execute("DELETE FROM chat_messages WHERE timestamp > ?", [
+            messageTimestamp,
+          ]);
+        }
+
+        // Update the message in the database
         await db.execute(
-          "DELETE FROM file_attachments WHERE chat_message_id = ?",
-          [updatedMessage.id],
+          "UPDATE chat_messages SET role = ?, content = ?, timestamp = ? WHERE id = ?",
+          [
+            updatedMessage.role,
+            updatedMessage.content,
+            updatedMessage.timestamp,
+            updatedMessage.id,
+          ],
         );
 
-        // Insert new attachments
-        for (const attachment of updates.attachments) {
+        // Handle attachments if they exist in the updates
+        if (updates.attachments) {
+          // Delete existing attachments
           await db.execute(
-            "INSERT INTO file_attachments (chat_message_id, file_name, file_type, data) VALUES (?, ?, ?, ?)",
-            [
-              updatedMessage.id,
-              attachment.file_name,
-              attachment.file_type,
-              JSON.stringify(attachment.data),
-            ],
+            "DELETE FROM file_attachments WHERE chat_message_id = ?",
+            [updatedMessage.id],
           );
-        }
-      }
 
-      return updatedMessage;
+          // Insert new attachments
+          for (const attachment of updates.attachments) {
+            await db.execute(
+              "INSERT INTO file_attachments (chat_message_id, file_name, file_type, data) VALUES (?, ?, ?, ?)",
+              [
+                updatedMessage.id,
+                attachment.file_name,
+                attachment.file_type,
+                JSON.stringify(attachment.data),
+              ],
+            );
+          }
+        }
+
+        return updatedMessage;
+      } catch (error) {
+        throw error;
+      }
     },
     onSuccess: (updatedMessage) => {
       queryClient.invalidateQueries({
         queryKey: ["message", updatedMessage.id],
       });
       queryClient.invalidateQueries({ queryKey: ["messages"] });
-      toast.success("Message updated successfully");
+      toast.success("Message updated and subsequent responses removed");
     },
     onError: (error, variables) => {
       toast.error(`Failed to update message: ${error.message}`, {
