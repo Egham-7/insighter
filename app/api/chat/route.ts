@@ -3,7 +3,7 @@ import { mastra } from "@/mastra";
 
 export async function POST(request: NextRequest) {
   try {
-    const { inputData, prompt } = await request.json();
+    const { inputData, prompt, resourceId, threadId } = await request.json();
     const agent = mastra.getAgent("dataAnalystAgent4o");
     console.log("Got agent");
 
@@ -18,7 +18,10 @@ export async function POST(request: NextRequest) {
       userContent = prompt;
     }
 
-    const stream = await agent.stream(userContent);
+    const stream = await agent.stream(userContent, {
+      resourceId,
+      threadId,
+    });
 
     return stream.toDataStreamResponse();
   } catch (error) {

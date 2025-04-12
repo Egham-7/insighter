@@ -159,12 +159,14 @@ export function ChatForm({
       );
       const dataAttachments = attachments.map((att) => att.data);
 
+      if (!user) return;
+
       // Start the completion with the data attachments
       await complete("Analyze this data and provide insights", {
         body: {
           inputData: dataAttachments,
           prompt: values.message,
-          resourceId: user?.id,
+          resourceId: user.id,
           threadId: chatId,
         },
       });
