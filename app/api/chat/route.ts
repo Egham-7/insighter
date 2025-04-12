@@ -5,10 +5,11 @@ export async function POST(request: NextRequest) {
   try {
     const { inputData, prompt } = await request.json();
     const agent = mastra.getAgent("dataAnalystAgent4o");
+    console.log("Got agent");
 
     let userContent;
 
-    if (inputData && Array.isArray(inputData) && inputData.length > 0) {
+    if (inputData) {
       // Data is available - create analysis prompt
       userContent = prompt
         ? `${prompt}\nData: ${JSON.stringify(inputData)}`
@@ -17,7 +18,7 @@ export async function POST(request: NextRequest) {
       userContent = prompt;
     }
 
-    const stream = await agent.stream([{ role: "user", content: userContent }]);
+    const stream = await agent.stream(userContent);
 
     return stream.toDataStreamResponse();
   } catch (error) {

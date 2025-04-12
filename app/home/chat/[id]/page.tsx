@@ -6,7 +6,6 @@ export default async function ChatPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  console.log("Chat ID:", id);
 
   return <ChatForm chatId={Number(id)} />;
 }

@@ -14,6 +14,7 @@
     "@clerk/nextjs": "^6.14.0",
     "@hookform/resolvers": "^5.0.1",
     "@mastra/core": "^0.8.2",
+    "@mastra/memory": "^0.2.9",
     "@radix-ui/react-accordion": "^1.2.3",
     "@radix-ui/react-alert-dialog": "^1.1.7",
     "@radix-ui/react-avatar": "^1.1.3",

@@ -20,6 +20,7 @@ import { Form } from "@/components/ui/form";
 import { useCompletion } from "@ai-sdk/react";
 import { ChatHeader } from "./ChatHeader";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { useUser } from "@clerk/nextjs";
 
 const formSchema = z.object({
   message: z.string().min(1, "Message is required"),
@@ -41,6 +42,8 @@ export function ChatForm({
   });
 
   const isSubmitting = form.formState.isSubmitting;
+
+  const { user, isLoaded, isSignedIn } = useUser();
 
   const { mutateAsync: createChatMessage } = useCreateChatMessage();
   const { mutateAsync: parseFile } = useParseFile();
@@ -64,13 +67,12 @@ export function ChatForm({
       setCompletion("");
     },
     onError: (error) => {
+      console.log("Error", error);
       toast.error("Error analyzing data", {
         description: error.message || "Unknown error",
       });
     },
   });
-
-  console.log("completion", completion);
 
   async function processFiles(
     files: FileWithPath[],
@@ -112,7 +114,9 @@ export function ChatForm({
       });
 
       toast.dismiss(loadingToast);
-      toast.success(`${attachments.length} file(s) attached successfully`);
+      toast.success(`${attachments.length} file(s) attached successfully`, {
+        dismissible: true,
+      });
 
       return attachments;
     } catch (error) {
@@ -122,6 +126,7 @@ export function ChatForm({
           error instanceof Error
             ? error.message
             : "Failed to process attached files",
+        dismissible: true,
       });
       throw error; // Re-throw to handle in the calling function
     }
@@ -158,8 +163,9 @@ export function ChatForm({
       await complete("Analyze this data and provide insights", {
         body: {
           inputData: dataAttachments,
-          messages: messages,
           prompt: values.message,
+          resourceId: user?.id,
+          threadId: chatId,
         },
       });
     } catch (error) {
@@ -167,7 +173,7 @@ export function ChatForm({
 
       // Clean up the user message if it was created but processing failed
       if (userMessageId) {
-        await deleteChatMessage(userMessageId).catch(console.error);
+        await deleteChatMessage(userMessageId);
       }
 
       toast.error("Error sending message", {
@@ -192,7 +198,7 @@ export function ChatForm({
     setAttachedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  if (isLoading) {
+  if (isLoading || !isLoaded) {
     return (
       <div className="flex flex-col justify-center items-center h-screen w-full">
         <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary mb-4"></div>
@@ -221,6 +227,10 @@ export function ChatForm({
         </button>
       </div>
     );
+  }
+
+  if (!isSignedIn) {
+    return null;
   }
 
   return (
