@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { mastra } from "@/mastra";
 
-export function errorHandler(error: unknown) {
+function errorHandler(error: unknown) {
   if (error == null) {
     return "unknown error";
   }
@@ -21,7 +21,6 @@ export async function POST(request: NextRequest) {
   try {
     const { inputData, prompt, resourceId, threadId } = await request.json();
     const agent = mastra.getAgent("dataAnalystAgent4o");
-    console.log("Got agent");
 
     let userContent;
 
@@ -38,8 +37,6 @@ export async function POST(request: NextRequest) {
       resourceId,
       threadId,
     });
-
-    console.log("Stream created");
 
     return stream.toDataStreamResponse({
       getErrorMessage: errorHandler,

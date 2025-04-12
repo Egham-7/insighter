@@ -67,7 +67,6 @@ export function ChatForm({
       setCompletion("");
     },
     onError: (error) => {
-      console.log("Error", error);
       toast.error("Error analyzing data", {
         description: error.message || "Unknown error",
       });
