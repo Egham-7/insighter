@@ -22,20 +22,36 @@ export async function POST(request: NextRequest) {
     const { inputData, prompt, resourceId, threadId } = await request.json();
     const agent = mastra.getAgent("dataAnalystAgent4o");
 
-    let userContent;
+    console.log("Input Data:", inputData);
 
-    if (inputData) {
-      // Data is available - create analysis prompt
-      userContent = prompt
-        ? `${prompt}\nData: ${JSON.stringify(inputData)}`
-        : `From this dataset: ${JSON.stringify(inputData)}. Analyze the data and provide statistical insights, and make recommendations.`;
-    } else {
-      userContent = prompt;
-    }
+    const formattedPrompt = `
+    Prompt: 
+      ${prompt}
 
-    const stream = await agent.stream(userContent, {
+Call the create visualization tool
+
+    Data: 
+      ${JSON.stringify(inputData)}
+`;
+
+    const stream = await agent.stream(formattedPrompt, {
       resourceId,
       threadId,
+      maxSteps: 5, // Allow up to 5 tool usage steps
+      onStepFinish: ({ text, toolCalls, toolResults }) => {
+        console.log("Step completed:", { text, toolCalls, toolResults });
+      },
+      onFinish: ({
+        steps,
+        finishReason, // 'complete', 'length', 'tool', etc.
+        usage, // token usage statistics
+      }) => {
+        console.log("Stream complete:", {
+          totalSteps: steps.length,
+          finishReason,
+          usage,
+        });
+      },
     });
 
     return stream.toDataStreamResponse({

@@ -125,7 +125,7 @@ export const useUpdateChatMessage = () => {
         queryKey: ["messages", updatedMessage.chat_id],
       });
       queryClient.invalidateQueries({ queryKey: ["messages"] });
-      toast.success("Message updated and subsequent responses removed");
+      toast.success("Message updated");
     },
     onError: (error, variables) => {
       toast.error(`Failed to update message: ${error.message}`, {

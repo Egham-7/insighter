@@ -9,17 +9,19 @@ use std::path::{Path, PathBuf};
 
 #[derive(Debug)]
 pub struct ParsedData<T> {
-    records: Vec<T>,
+    data: T,
     file_name: String,
 }
 
 impl<T> ParsedData<T> {
-    pub fn new(records: Vec<T>, file_name: String) -> Self {
-        Self { records, file_name }
+    // Constructor now takes a single data item
+    pub fn new(data: T, file_name: String) -> Self {
+        Self { data, file_name }
     }
 
-    pub fn records(&self) -> &[T] {
-        &self.records
+    // Renamed method to access the data
+    pub fn data(&self) -> &T {
+        &self.data
     }
 
     pub fn file_name(&self) -> &str {
@@ -29,6 +31,10 @@ impl<T> ParsedData<T> {
 
 pub trait FileParser {
     type Output: Serialize;
+
+    // The parse function returns ParsedData containing the single Output item.
     fn parse(&self, path: PathBuf) -> Result<ParsedData<Self::Output>, Box<dyn std::error::Error>>;
+
+    // Validate function remains the same.
     fn validate(&self, path: &Path) -> bool;
 }
