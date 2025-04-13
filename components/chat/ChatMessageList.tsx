@@ -30,18 +30,16 @@ export function ChatMessageList({
 }: ChatMessageListProps) {
   return (
     <div className="flex-1 overflow-y-auto px-4 py-8">
-      <div className="mx-auto max-w-3xl">
-        {messages.map((message) => (
-          <ChatMessageComponent
-            complete={complete}
-            key={message.id}
-            message={message}
-            isAnalyzing={isAnalyzing}
-          />
-        ))}
+      {messages.map((message) => (
+        <ChatMessageComponent
+          complete={complete}
+          key={message.id}
+          message={message}
+          isAnalyzing={isAnalyzing}
+        />
+      ))}
 
-        <StreamingMessage content={streamingMessage} isLoading={isAnalyzing} />
-      </div>
+      <StreamingMessage content={streamingMessage} isLoading={isAnalyzing} />
     </div>
   );
 }

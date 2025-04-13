@@ -8,6 +8,7 @@ import { EditMessageForm } from "./EditMessageForm";
 import useDeleteChatMessage from "@/hooks/chat/useDeleteChatMessage";
 import MarkdownRenderer from "../MarkdownRenderer";
 import { useUpdateChatMessage } from "@/hooks/chat/useUpdateChatMessage";
+import { useUser } from "@clerk/nextjs";
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -107,29 +108,25 @@ export function ChatMessage({
 
 function AIMessage({ message }: { message: ChatMessageType }) {
   return (
-    <div className="mb-6 flex w-full">
-      <div className="max-w-[80%]">
-        <div className="rounded-2xl bg-muted p-4">
-          <MarkdownRenderer content={message.content} />
-          {message.attachments && message.attachments.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {message.attachments.map((attachment, i) => (
-                <div
-                  key={i}
-                  className="relative h-24 w-24 overflow-hidden rounded-lg border"
-                >
-                  <Image
-                    src={"/images/csv.png"}
-                    alt={attachment.file_name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              ))}
+    <div className="mb-6 flex w-full px-12">
+      <MarkdownRenderer content={message.content} />
+      {message.attachments && message.attachments.length > 0 && (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {message.attachments.map((attachment, i) => (
+            <div
+              key={i}
+              className="relative h-24 w-24 overflow-hidden rounded-lg border"
+            >
+              <Image
+                src={"/images/csv.png"}
+                alt={attachment.file_name}
+                fill
+                className="object-cover"
+              />
             </div>
-          )}
+          ))}
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -148,17 +145,25 @@ function UserMessage({
     useDeleteChatMessage();
   const { mutateAsync: updateChatMessage, isPending: isUpdating } =
     useUpdateChatMessage();
+  const { user, isLoaded, isSignedIn } = useUser();
 
   const handleDelete = async (id: number) => {
     await deleteChatMessage(id);
   };
 
   const handleRetry = (content: string) => {
+    if (!user || !isSignedIn) return;
     updateChatMessage({
       id: message.id,
       updates: { ...message, content },
     });
-    complete(content);
+    complete(content, {
+      body: {
+        inputData: message.attachments,
+        resourceId: user.id,
+        threadId: message.chat_id,
+      },
+    });
   };
 
   if (isEditing) {
@@ -172,7 +177,7 @@ function UserMessage({
     );
   }
 
-  const isLoading = isAnalyzing || isUpdating || isDeleting;
+  const isLoading = isAnalyzing || isUpdating || isDeleting || !isLoaded;
 
   return (
     <div className="mb-6 flex flex-col group items-end">
