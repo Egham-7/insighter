@@ -161,10 +161,9 @@ export function ChatForm({
       if (!user) return;
 
       // Start the completion with the data attachments
-      await complete("Analyze this data and provide insights", {
+      await complete(values.message, {
         body: {
           inputData: dataAttachments.length > 0 ? dataAttachments : null,
-          prompt: values.message,
           resourceId: user.id,
           threadId: chatId,
         },

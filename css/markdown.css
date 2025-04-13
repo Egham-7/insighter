@@ -1,0 +1,176 @@
+/* markdown.css */
+.markdown {
+  max-width: 800px;
+  margin: 0;
+  padding: 0 20px;
+  line-height: 1.6;
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4,
+.markdown h5,
+.markdown h6 {
+  margin-bottom: 1.5rem;
+  color: var(--primary-foreground);
+}
+
+.markdown h1 {
+  font-size: 1rem;
+}
+.markdown h2 {
+  font-size: 1rem;
+}
+.markdown h3 {
+  font-size: 1rem;
+}
+
+.markdown p {
+  margin-bottom: 1.5rem;
+  max-width: 100%;
+}
+
+.markdown a {
+  color: var(--accent-foreground);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.markdown a:hover {
+  opacity: 0.8;
+}
+
+.markdown ul,
+.markdown ol {
+  margin-bottom: 1.5rem;
+  padding-left: 1.5rem;
+}
+
+.markdown li {
+  margin-bottom: 0.5rem;
+}
+
+.markdown pre {
+  margin: 2.5rem 0;
+  padding: 1.5rem;
+  background-color: var(--card);
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.markdown code {
+  padding: 0.2rem 0.4rem;
+  background-color: var(--card);
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  color: var(--foreground);
+}
+
+.markdown blockquote {
+  margin: 1.5rem 0;
+  padding: 0.5rem 1rem;
+  border-left: 4px solid var(--muted);
+  color: var(--muted-foreground);
+}
+
+.markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2.5rem 0;
+  background-color: var(--card);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.markdown th,
+.markdown td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.markdown th {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: bold;
+}
+
+.markdown tr:nth-child(even) {
+  background-color: var(--card);
+}
+
+.markdown tr:nth-child(odd) {
+  background-color: var(--background);
+}
+
+.markdown img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 1.5rem 0;
+}
+
+/* List styling */
+.markdown ul {
+  list-style-type: disc;
+}
+
+.markdown ol {
+  list-style-type: decimal;
+}
+
+/* Code block styling */
+.markdown pre code {
+  padding: 0;
+  background-color: transparent;
+  font-family: var(--font-mono);
+}
+
+/* Horizontal rule */
+.markdown hr {
+  height: 1px;
+  background-color: var(--border);
+  border: none;
+  margin: 2.5rem 0;
+}
+
+/* Blockquote styling */
+.markdown blockquote p {
+  margin-bottom: 0.5rem;
+}
+
+/* Dark mode overrides */
+.dark .markdown {
+  color: var(--foreground);
+}
+
+.dark .markdown blockquote {
+  border-left: 4px solid var(--sidebar-border);
+}
+
+.dark .markdown table {
+  background-color: var(--card);
+}
+
+.dark .markdown th {
+  background-color: var(--sidebar-primary);
+}
+
+.dark .markdown tr:nth-child(even) {
+  background-color: var(--card);
+}
+
+.dark .markdown tr:nth-child(odd) {
+  background-color: var(--background);
+}
+
+/* Transition effects */
+.markdown a,
+.markdown blockquote,
+.markdown pre,
+.markdown table {
+  transition: all 0.2s ease;
+}

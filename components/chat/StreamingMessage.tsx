@@ -13,7 +13,12 @@ export function StreamingMessage({
   className,
   isLoading,
 }: StreamingMessageProps) {
-  if (isLoading) return <LoadingIndicator />;
+  if (isLoading)
+    return (
+      <div className="px-6 py-4 text-gray-900 dark:text-foreground">
+        <LoadingIndicator />
+      </div>
+    );
 
   if (!content) return null;
 
