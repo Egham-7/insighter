@@ -11,8 +11,6 @@ import { ChatMessageList } from "./ChatMessageList";
 import { ChatInput, FileWithPath } from "./ChatInput";
 import { useCreateChatMessage } from "@/hooks/chat/useCreateChatMessage";
 import useParseFile from "@/hooks/parsers/useParseFile";
-import { useUpdateChatMessage } from "@/hooks/chat/useUpdateChatMessage";
-import useDeleteChatMessage from "@/hooks/chat/useDeleteChatMessage";
 import { useGetChatMessages } from "@/hooks/chat/useGetChatMessages";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -47,14 +45,13 @@ export function ChatForm({
 
   const { mutateAsync: createChatMessage } = useCreateChatMessage();
   const { mutateAsync: parseFile } = useParseFile();
-  const { mutateAsync: updateChatMessage } = useUpdateChatMessage();
-  const { mutateAsync: deleteChatMessage } = useDeleteChatMessage();
 
   const {
     completion,
     complete,
     isLoading: isAnalyzing,
     setCompletion,
+    stop,
   } = useCompletion({
     api: "/api/chat",
     onFinish: async (_prompt: string, completion) => {
@@ -67,96 +64,75 @@ export function ChatForm({
       setCompletion("");
     },
     onError: (error) => {
+      console.error("Error in completion:", error);
       toast.error("Error analyzing data", {
         description: error.message || "Unknown error",
       });
     },
   });
 
-  async function processFiles(
-    files: FileWithPath[],
-    messageId: number,
-  ): Promise<FileAttachment[]> {
-    return Promise.all(
-      files.map(async (file) => {
-        const data = await parseFile(file.path);
-        const fileExtension = file.name.split(".").pop()?.toLowerCase();
-        const fileTypeEnum =
-          Object.values(FileType).find(
-            (type) => type.toLowerCase() === fileExtension,
-          ) || FileType.CSV;
-
-        return {
-          file_name: file.name,
-          file_type: fileTypeEnum,
-          data: JSON.stringify(data),
-          chat_message_id: messageId,
-          id: 0,
-        };
-      }),
-    );
-  }
-
-  async function handleFileProcessing(
-    files: FileWithPath[],
-    messageId: number,
-  ) {
-    const loadingToast = toast.loading("Processing attached files...");
-
-    try {
-      const attachments = await processFiles(files, messageId);
-
-      // Update message with attachments
-      await updateChatMessage({
-        id: messageId,
-        updates: { id: messageId, attachments },
-      });
-
-      toast.dismiss(loadingToast);
-      toast.success(`${attachments.length} file(s) attached successfully`, {
-        dismissible: true,
-      });
-
-      return attachments;
-    } catch (error) {
-      toast.dismiss(loadingToast);
-      toast.error("Error processing files", {
-        description:
-          error instanceof Error
-            ? error.message
-            : "Failed to process attached files",
-        dismissible: true,
-      });
-      throw error; // Re-throw to handle in the calling function
-    }
-  }
-
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-    let userMessageId: number | null = null;
-
     try {
-      // Create user message
-      const chatMessage = await createChatMessage({
+      // Prepare files for processing
+      const filesToProcess = [...attachedFiles];
+      setAttachedFiles([]);
+
+      // Reset form immediately for better UX
+      form.reset();
+
+      // Process files first if there are any
+      let attachments: FileAttachment[] = [];
+      let dataAttachments: string[] = [];
+
+      if (filesToProcess.length > 0) {
+        const loadingToast = toast.loading("Processing attached files...");
+
+        try {
+          // Process files to get their data
+          attachments = await Promise.all(
+            filesToProcess.map(async (file) => {
+              const data = await parseFile(file.path);
+              const fileExtension = file.name.split(".").pop()?.toLowerCase();
+              const fileTypeEnum =
+                Object.values(FileType).find(
+                  (type) => type.toLowerCase() === fileExtension,
+                ) || FileType.CSV;
+
+              return {
+                file_name: file.name,
+                file_type: fileTypeEnum,
+                data: JSON.stringify(data),
+                chat_message_id: 0, // This will be set by the backend
+                id: 0,
+              };
+            }),
+          );
+
+          dataAttachments = attachments.map((att) => att.data);
+          toast.dismiss(loadingToast);
+        } catch (error) {
+          toast.dismiss(loadingToast);
+          toast.error("Error processing files", {
+            description:
+              error instanceof Error
+                ? error.message
+                : "Failed to process attached files",
+            dismissible: true,
+          });
+          throw error;
+        }
+      }
+
+      // Create user message with attachments in a single call
+      await createChatMessage({
         role: "user",
         content: values.message,
         timestamp: Date.now(),
         chat_id: chatId,
+        attachments: attachments.length > 0 ? attachments : undefined,
       });
 
-      userMessageId = chatMessage.id;
-
-      // Reset form immediately
-      form.reset();
-
-      // Process files if there are any
-      const filesToProcess = [...attachedFiles];
-      setAttachedFiles([]);
-
-      const attachments = await handleFileProcessing(
-        filesToProcess,
-        chatMessage.id,
-      );
-      const dataAttachments = attachments.map((att) => att.data);
+      toast.success("Message sent successfully");
 
       if (!user) return;
 
@@ -170,11 +146,6 @@ export function ChatForm({
       });
     } catch (error) {
       console.error("Error in submission:", error);
-
-      // Clean up the user message if it was created but processing failed
-      if (userMessageId) {
-        await deleteChatMessage(userMessageId);
-      }
 
       toast.error("Error sending message", {
         description: "Failed to send your message. Please try again.",
@@ -256,6 +227,7 @@ export function ChatForm({
             onSubmit={handleSubmit}
             isSubmitting={isSubmitting || isAnalyzing}
             attachedFiles={attachedFiles}
+            stop={stop}
             onAddFiles={addFiles}
             onRemoveFile={removeFile}
             handleKeyDown={handleKeyDown}

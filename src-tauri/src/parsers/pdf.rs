@@ -18,22 +18,17 @@ pub enum PdfError {
     InvalidPath,
 }
 
-/// Parser for extracting text and metadata from PDF files
-///
-/// This parser extracts text content from PDF files, splitting it into pages
-/// and optionally extracting metadata. It supports processing pages in batches
-/// to handle large documents efficiently.
 #[derive(Debug)]
 pub struct PdfParser {
-    batch_size: usize,
-    extract_metadata: bool,
+    // Removed batch_size
+    extract_metadata: bool, // Kept for potential future use, but not used in current output
     password: Option<String>,
 }
 
 impl Default for PdfParser {
     fn default() -> Self {
         Self {
-            batch_size: 1000,
+            // batch_size: 1000, // Removed
             extract_metadata: true,
             password: None,
         }
@@ -41,26 +36,17 @@ impl Default for PdfParser {
 }
 
 impl PdfParser {
-    /// Creates a new PDF parser with default settings
     pub fn new() -> Self {
         Self::default()
     }
 
-    /// Sets the batch size for processing pages
-    ///
-    /// Larger batch sizes may improve performance but increase memory usage.
-    pub fn with_batch_size(mut self, batch_size: usize) -> Self {
-        self.batch_size = batch_size;
-        self
-    }
+    // Removed with_batch_size
 
-    /// Controls whether PDF metadata should be extracted
     pub fn with_metadata(mut self, extract_metadata: bool) -> Self {
         self.extract_metadata = extract_metadata;
         self
     }
 
-    /// Sets a password for encrypted PDF documents
     pub fn with_password(mut self, password: impl Into<String>) -> Self {
         self.password = Some(password.into());
         self
@@ -79,34 +65,30 @@ impl PdfParser {
 }
 
 impl FileParser for PdfParser {
-    type Output = Value;
+    type Output = Value; // Output is a single Value (Value::Array)
 
     fn parse(&self, path: PathBuf) -> Result<ParsedData<Self::Output>, Box<dyn std::error::Error>> {
-        // Extract filename for metadata
         let file_name = path
             .file_name()
             .and_then(|name| name.to_str())
             .ok_or(PdfError::InvalidPath)?
             .to_string();
 
-        // Read the PDF file with a capacity hint from the file size
         let file = File::open(&path)?;
         let file_size = file.metadata()?.len() as usize;
         let mut buffer = Vec::with_capacity(file_size);
         let mut reader = BufReader::new(file);
         reader.read_to_end(&mut buffer)?;
 
-        // Extract text from PDF by pages
         let pages = self.extract_text(&buffer)?;
 
-        // Process pages in batches
-        let mut all_pages = Vec::new();
-        let mut batch = Vec::with_capacity(self.batch_size.min(pages.len()));
+        // Collect all page objects into a single Vec
+        let mut all_page_objects = Vec::with_capacity(pages.len());
 
         for (page_num, page_content) in pages.iter().enumerate() {
             let content = page_content.trim();
             if content.is_empty() {
-                continue;
+                continue; // Skip empty pages
             }
 
             let mut page_obj = Map::with_capacity(2);
@@ -115,26 +97,13 @@ impl FileParser for PdfParser {
                 Value::Number((page_num + 1).into()),
             );
             page_obj.insert("content".to_string(), Value::String(content.to_string()));
-            batch.push(Value::Object(page_obj));
-
-            // When batch is full, add it to results and start a new batch
-            if batch.len() >= self.batch_size {
-                all_pages.push(Value::Array(std::mem::take(&mut batch)));
-                batch = Vec::with_capacity(self.batch_size.min(pages.len() - page_num - 1));
-            }
+            all_page_objects.push(Value::Object(page_obj));
         }
 
-        // Add any remaining pages
-        if !batch.is_empty() {
-            all_pages.push(Value::Array(batch));
-        }
+        // Wrap the collection of page objects in a single Value::Array
+        let final_output = Value::Array(all_page_objects);
 
-        // Add metadata if requested
-        let mut result =
-            Vec::with_capacity(all_pages.len() + if self.extract_metadata { 1 } else { 0 });
-        result.extend(all_pages);
-
-        Ok(ParsedData::new(result, file_name))
+        Ok(ParsedData::new(final_output, file_name))
     }
 
     fn validate(&self, path: &Path) -> bool {

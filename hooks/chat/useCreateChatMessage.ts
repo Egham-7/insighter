@@ -59,7 +59,6 @@ export const useCreateChatMessage = () => {
       queryClient.invalidateQueries({ queryKey: ["messages"] });
       queryClient.invalidateQueries({ queryKey: ["messages", data.chat_id] });
       queryClient.invalidateQueries({ queryKey: ["message", data.id] });
-      toast.success("Message created successfully");
     },
     onError: (error) => {
       toast.error(`Failed to create message: ${error.message}`, {

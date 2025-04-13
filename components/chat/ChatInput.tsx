@@ -2,7 +2,7 @@ import { UseFormReturn } from "react-hook-form";
 import * as z from "zod";
 import { FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { ArrowUp, Paperclip } from "lucide-react";
+import { ArrowUp, Paperclip, Square } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -33,6 +33,7 @@ interface ChatInputProps {
   onAddFiles: (files: FileWithPath[]) => void;
   onRemoveFile: (index: number) => void;
   handleKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  stop: () => void;
 }
 
 export function ChatInput({
@@ -43,6 +44,7 @@ export function ChatInput({
   onAddFiles,
   onRemoveFile,
   handleKeyDown,
+  stop,
 }: ChatInputProps) {
   const validateFiles = (files: FileWithPath[]): boolean => {
     return files.every((file) =>
@@ -135,20 +137,38 @@ export function ChatInput({
             )}
           />
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="submit"
-                size="icon"
-                className="absolute bottom-3 right-3 h-10 w-10 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 hover:cursor-pointer"
-                disabled={isSubmitting}
-              >
-                <ArrowUp size={18} />
-                <span className="sr-only">Send message</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Send message</TooltipContent>
-          </Tooltip>
+          {isSubmitting ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="destructive"
+                  onClick={stop}
+                  className="absolute bottom-3 right-3 h-10 w-10 rounded-full"
+                >
+                  <Square size={16} className="fill-current" />
+                  <span className="sr-only">Stop generation</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Stop generation</TooltipContent>
+            </Tooltip>
+          ) : (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="submit"
+                  size="icon"
+                  className="absolute bottom-3 right-3 h-10 w-10 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 hover:cursor-pointer"
+                  disabled={isSubmitting}
+                >
+                  <ArrowUp size={18} />
+                  <span className="sr-only">Send message</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Send message</TooltipContent>
+            </Tooltip>
+          )}
         </div>
       </form>
     </div>

@@ -1,10 +1,18 @@
-use crate::parsers::{csv::CsvParser, pdf::PdfParser, FileParser};
+use crate::parsers::{csv::CsvParser, pdf::PdfParser, FileParser}; // Ensure ParsedData is imported
 use serde_json::Value;
 use std::path::PathBuf;
 
 #[tauri::command]
 pub fn parse_file(file_path: String) -> Result<Value, String> {
     let path = PathBuf::from(file_path);
+
+    // Check if the file exists before proceeding
+    if !path.exists() {
+        return Err(format!("File not found: {}", path.display()));
+    }
+    if !path.is_file() {
+        return Err(format!("Path is not a file: {}", path.display()));
+    }
 
     let extension = path
         .extension()
@@ -14,11 +22,11 @@ pub fn parse_file(file_path: String) -> Result<Value, String> {
 
     match extension.as_str() {
         "csv" => {
-            let parser = CsvParser::new();
+            let parser = CsvParser::new().with_headers(true).with_delimiter(b',');
             parse_with_parser(parser, path)
         }
         "pdf" => {
-            let parser = PdfParser::new();
+            let parser = PdfParser::new().with_metadata(false);
             parse_with_parser(parser, path)
         }
         _ => Err(format!("Unsupported file type: {}", extension)),
@@ -27,17 +35,25 @@ pub fn parse_file(file_path: String) -> Result<Value, String> {
 
 fn parse_with_parser<P>(parser: P, path: PathBuf) -> Result<Value, String>
 where
+    // The parser's Output type must be serde_json::Value
     P: FileParser<Output = Value>,
 {
+    // Validation is good, keep it.
     if !parser.validate(&path) {
-        return Err(format!("Invalid file format for path: {}", path.display()));
+        // Provide a more specific error if validation fails
+        return Err(format!(
+            "File validation failed for parser: {}",
+            path.display()
+        ));
     }
 
+    // Call the parser's parse method
     parser
-        .parse(path)
-        .map(|data| {
-            let records = data.records();
-            serde_json::to_value(records).unwrap_or(Value::Null)
+        .parse(path.clone())
+        .map(|parsed_data| parsed_data.data().clone())
+        .map_err(|e| {
+            // Improve error reporting
+            eprintln!("Parsing error for {}: {}", path.display(), e);
+            format!("Failed to parse file {}: {}", path.display(), e)
         })
-        .map_err(|e| e.to_string())
 }

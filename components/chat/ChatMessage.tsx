@@ -157,9 +157,11 @@ function UserMessage({
       id: message.id,
       updates: { ...message, content },
     });
+
+    const attachments = message.attachments?.map((att) => att.data);
     complete(content, {
       body: {
-        inputData: message.attachments,
+        inputData: attachments && attachments.length > 0 ? attachments : null,
         resourceId: user.id,
         threadId: message.chat_id,
       },
