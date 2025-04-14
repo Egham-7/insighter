@@ -21,7 +21,6 @@ import { useCompletion } from "@ai-sdk/react";
 import { ChatHeader } from "./ChatHeader";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useUser } from "@clerk/nextjs";
-import { StagehandEmbed } from "../StagehandEmbed";
 
 const formSchema = z.object({
   message: z.string().min(1, "Message is required"),
@@ -227,11 +226,6 @@ export function ChatForm({
               complete={complete}
               isAnalyzing={isAnalyzing}
             />
-          </div>
-
-          {/* Insighter Panel - Fixed width */}
-          <div className="w-full max-w-[300px] border-l ">
-            <StagehandEmbed />
           </div>
         </div>
 
