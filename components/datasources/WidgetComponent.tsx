@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import type { Widget, DateRange } from "@/lib/types/datasources";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -37,8 +36,6 @@ export default function WidgetComponent({
   isCustomizing,
   onRemove,
 }: WidgetComponentProps) {
-  const [isLoading, setIsLoading] = useState(false);
-
   const renderWidgetContent = () => {
     switch (widget.type) {
       case "metric":
@@ -123,15 +120,7 @@ export default function WidgetComponent({
           )}
         </div>
       </CardHeader>
-      <CardContent>
-        {isLoading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        ) : (
-          renderWidgetContent()
-        )}
-      </CardContent>
+      <CardContent>{renderWidgetContent()}</CardContent>
     </Card>
   );
 }

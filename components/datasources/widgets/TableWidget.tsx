@@ -12,16 +12,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+interface TableData {
+  headers: string[];
+  rows: Array<Record<string, unknown>>;
+}
+
 interface TableWidgetProps {
   widget: Widget;
   dateRange: DateRange;
 }
 
 export default function TableWidget({ widget, dateRange }: TableWidgetProps) {
-  const [data, setData] = useState<{
-    headers: string[];
-    rows: any[];
-  } | null>(null);
+  const [data, setData] = useState<TableData | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -30,7 +32,7 @@ export default function TableWidget({ widget, dateRange }: TableWidgetProps) {
         widget.id,
         dateRange,
       );
-      setData(tableData);
+      setData(tableData as TableData);
     };
 
     loadData();
@@ -56,7 +58,7 @@ export default function TableWidget({ widget, dateRange }: TableWidgetProps) {
           {data.rows.map((row, rowIndex) => (
             <TableRow key={rowIndex}>
               {data.headers.map((header, cellIndex) => (
-                <TableCell key={cellIndex}>{row[header]}</TableCell>
+                <TableCell key={cellIndex}>{String(row[header])}</TableCell>
               ))}
             </TableRow>
           ))}

@@ -3,7 +3,12 @@
 import { useState, useEffect } from "react";
 import type { Widget, DateRange } from "@/lib/types/datasources";
 import WidgetComponent from "./WidgetComponent";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  type DropResult,
+} from "@hello-pangea/dnd";
 
 interface WidgetGridProps {
   widgets: Widget[];
@@ -23,19 +28,17 @@ export default function WidgetGrid({
   const [orderedWidgets, setOrderedWidgets] = useState<Widget[]>([]);
 
   useEffect(() => {
-    // Sort widgets by position
     const sorted = [...widgets].sort((a, b) => a.position - b.position);
     setOrderedWidgets(sorted);
   }, [widgets]);
 
-  const handleDragEnd = (result: any) => {
+  const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
 
     const items = Array.from(orderedWidgets);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
-    // Update positions
     const updatedWidgets = items.map((item, index) => ({
       ...item,
       position: index,
@@ -50,7 +53,7 @@ export default function WidgetGrid({
       <div className="flex flex-col items-center justify-center h-64 bg-white rounded-lg border border-dashed border-slate-300 p-6">
         <p className="text-slate-500 mb-4">No widgets added yet</p>
         <p className="text-sm text-slate-400">
-          Click "Customize" and then "Add Widget" to get started
+          Click &quo;Customize&quo; and then &quo;Add Widget&quo; to get started
         </p>
       </div>
     );

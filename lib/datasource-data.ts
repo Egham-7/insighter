@@ -2,9 +2,9 @@ import type { DateRange } from "@/lib/types/datasources";
 
 // Mock data functions that would normally fetch from an API
 export async function fetchMetricData(
-  dataSourceId: string,
+  _dataSourceId: string,
   widgetId: string,
-  dateRange: DateRange,
+  _dateRange: DateRange,
 ) {
   // Simulate API call
   await new Promise((resolve) => setTimeout(resolve, 500));
@@ -59,11 +59,7 @@ export async function fetchMetricData(
   }
 }
 
-export async function fetchChartData(
-  dataSourceId: string,
-  widgetId: string,
-  dateRange: DateRange,
-) {
+export async function fetchChartData() {
   // Simulate API call
   await new Promise((resolve) => setTimeout(resolve, 700));
 
@@ -84,11 +80,7 @@ export async function fetchChartData(
   return data;
 }
 
-export async function fetchTableData(
-  dataSourceId: string,
-  widgetId: string,
-  dateRange: DateRange,
-) {
+export async function fetchTableData(widgetId: string) {
   // Simulate API call
   await new Promise((resolve) => setTimeout(resolve, 600));
 
@@ -208,11 +200,7 @@ export async function fetchTableData(
   };
 }
 
-export async function fetchCampaignData(
-  dataSourceId: string,
-  widgetId: string,
-  dateRange: DateRange,
-) {
+export async function fetchCampaignData() {
   // Simulate API call
   await new Promise((resolve) => setTimeout(resolve, 800));
 
