@@ -46,11 +46,7 @@ export default function ChartWidget({ widget, dateRange }: ChartWidgetProps) {
       setError(null);
       setData(null);
       try {
-        const chartData = await fetchChartData(
-          widget.dataSourceId,
-          widget.id,
-          dateRange,
-        );
+        const chartData = await fetchChartData();
         if (
           Array.isArray(chartData) &&
           chartData.every((item) => "date" in item && "value" in item)

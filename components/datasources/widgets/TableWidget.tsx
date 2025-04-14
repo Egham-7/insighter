@@ -27,11 +27,7 @@ export default function TableWidget({ widget, dateRange }: TableWidgetProps) {
 
   useEffect(() => {
     const loadData = async () => {
-      const tableData = await fetchTableData(
-        widget.dataSourceId,
-        widget.id,
-        dateRange,
-      );
+      const tableData = await fetchTableData(widget.dataSourceId);
       setData(tableData as TableData);
     };
 

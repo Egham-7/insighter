@@ -25,11 +25,7 @@ export default function CampaignWidget({
 
   useEffect(() => {
     const loadData = async () => {
-      const campaignData = await fetchCampaignData(
-        widget.dataSourceId,
-        widget.id,
-        dateRange,
-      );
+      const campaignData = await fetchCampaignData();
       setData(campaignData);
     };
 
