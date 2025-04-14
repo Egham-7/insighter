@@ -22,11 +22,7 @@ export default function MetricWidget({ widget, dateRange }: MetricWidgetProps) {
 
   useEffect(() => {
     const loadData = async () => {
-      const metricData = await fetchMetricData(
-        widget.dataSourceId,
-        widget.id,
-        dateRange,
-      );
+      const metricData = await fetchMetricData(widget.id);
       setData(metricData);
     };
 
