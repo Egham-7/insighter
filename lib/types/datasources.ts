@@ -1,9 +1,9 @@
-import type { LucideIcon } from "lucide-react";
+import type { IconType } from "react-icons/lib";
 
 export interface DataSource {
   id: string;
   name: string;
-  icon: LucideIcon;
+  icon: IconType;
   color: string;
   bgColor: string;
 }

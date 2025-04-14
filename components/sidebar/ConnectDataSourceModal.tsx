@@ -1,9 +1,8 @@
 "use client";
 
-import type React from "react";
-
 import { useState } from "react";
-import { SiFacebook, SiGoogleads, SiLinkedin, SiTiktok } from "react-icons/si";
+import type React from "react";
+import { SiMeta, SiGoogleads, SiLinkedin, SiTiktok } from "react-icons/si";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,6 +16,7 @@ import {
 import { Card, CardContent, CardHeader } from "../ui/card";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { MultiStepLoader } from "../ui/multi-step-loader";
 
 type DataSource = {
   id: string;
@@ -28,12 +28,13 @@ export default function ConnectDataSourceModal() {
   const [open, setOpen] = useState(false);
   const [selectedSource, setSelectedSource] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
+  const router = useRouter();
 
   const dataSources: DataSource[] = [
     {
       id: "meta-ads",
       name: "Meta Ads",
-      icon: <SiFacebook className="h-12 w-12" />,
+      icon: <SiMeta className="h-12 w-12" />,
     },
     {
       id: "google-ads",
@@ -52,11 +53,16 @@ export default function ConnectDataSourceModal() {
     },
   ];
 
-  const router = useRouter();
-
   const handleSelectSource = (sourceId: string) => {
     setSelectedSource(sourceId);
   };
+
+  // Updated loading states with clearer, sequential steps
+  const loadingStates = [
+    { text: "Initiating connection..." },
+    { text: "Verifying credentials..." },
+    { text: "Finalizing setup..." },
+  ];
 
   const handleConnect = async () => {
     if (!selectedSource) return;
@@ -64,7 +70,8 @@ export default function ConnectDataSourceModal() {
     setIsConnecting(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Simulate an API call
+      await new Promise((resolve) => setTimeout(resolve, 5000));
       console.log(`Connected to ${selectedSource}`);
       setOpen(false);
       setSelectedSource(null);
@@ -91,6 +98,17 @@ export default function ConnectDataSourceModal() {
       }
     }
   };
+
+  if (isConnecting) {
+    return (
+      <MultiStepLoader
+        loadingStates={loadingStates}
+        loading
+        duration={2000}
+        loop
+      />
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -140,14 +158,7 @@ export default function ConnectDataSourceModal() {
             disabled={!selectedSource || isConnecting}
             className="min-w-[120px]"
           >
-            {isConnecting ? (
-              <>
-                <span className="mr-2">Connecting</span>
-                <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin"></div>
-              </>
-            ) : (
-              "Connect"
-            )}
+            Connect
           </Button>
         </DialogFooter>
       </DialogContent>

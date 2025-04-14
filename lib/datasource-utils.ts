@@ -1,4 +1,4 @@
-import { Facebook, Search, LineChart, Music } from "lucide-react";
+import { SiGoogleads, SiLinkedin, SiMeta, SiTiktok } from "react-icons/si";
 import type { DataSource, Widget } from "@/lib/types/datasources";
 
 export function getDataSourceInfo(sourceId: string): DataSource {
@@ -6,28 +6,28 @@ export function getDataSourceInfo(sourceId: string): DataSource {
     "meta-ads": {
       id: "meta-ads",
       name: "Meta Ads",
-      icon: Facebook,
+      icon: SiMeta,
       color: "#1877F2",
       bgColor: "#1877F2",
     },
     "google-ads": {
       id: "google-ads",
       name: "Google Ads",
-      icon: Search,
+      icon: SiGoogleads,
       color: "#EA4335",
       bgColor: "#EA4335",
     },
     "linkedin-ads": {
       id: "linkedin-ads",
       name: "LinkedIn Ads",
-      icon: LineChart,
+      icon: SiLinkedin,
       color: "#0A66C2",
       bgColor: "#0A66C2",
     },
     "tiktok-ads": {
       id: "tiktok-ads",
       name: "TikTok Ads",
-      icon: Music,
+      icon: SiTiktok,
       color: "#000000",
       bgColor: "#000000",
     },
@@ -37,7 +37,6 @@ export function getDataSourceInfo(sourceId: string): DataSource {
 }
 
 export function getInitialWidgets(sourceId: string): Widget[] {
-  // Different initial widgets based on data source
   const commonWidgets: Widget[] = [
     {
       id: "total-spend",
@@ -89,7 +88,6 @@ export function getInitialWidgets(sourceId: string): Widget[] {
     },
   ];
 
-  // Add source-specific widgets
   if (sourceId === "meta-ads") {
     return [
       ...commonWidgets,
