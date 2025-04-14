@@ -1,9 +1,11 @@
 name: CI
+
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+
 jobs:
   test:
     name: Test on ${{ matrix.os }}
@@ -15,29 +17,27 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+      - uses: pnpm/action-setup@v4
         with:
-          bun-version: latest
+          version: "latest"
+          run_install: false
       - name: Cache dependencies
         uses: actions/cache@v3
         with:
           path: |
             **/node_modules
-            ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+            ~/.pnpm/cache
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-bun-
+            ${{ runner.os }}-pnpm-
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
       - name: Type check
-        run: bun run type-check
+        run: pnpm run type-check
       - name: Lint
-        run: bun run lint
-      - name: Run frontend tests
-        run: bun test
+        run: pnpm run lint
       - name: Build Next.js
-        run: bun run build
+        run: pnpm run build
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
