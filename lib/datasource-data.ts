@@ -1,11 +1,5 @@
-import type { DateRange } from "@/lib/types/datasources";
-
 // Mock data functions that would normally fetch from an API
-export async function fetchMetricData(
-  _dataSourceId: string,
-  widgetId: string,
-  _dateRange: DateRange,
-) {
+export async function fetchMetricData(widgetId: string) {
   // Simulate API call
   await new Promise((resolve) => setTimeout(resolve, 500));
 
