@@ -1,7 +1,7 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Settings, Trash2, AlertTriangle } from "lucide-react";
 import {
   DropdownMenu,
@@ -20,19 +20,49 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import AddDatasourceToChatDialog from "./AddDatasourceToChatDialog";
 import useClearAllChatMessages from "@/hooks/chat/useClearAllChatMessages";
 
+export interface DataSource {
+  id: string;
+  name: string;
+  icon: React.ReactNode;
+}
+
+export interface ChatHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
+  chatTitle: string;
+  chatId: number;
+  lastActive?: Date;
+}
+
 export function ChatHeader({
+  chatTitle,
+  lastActive,
+  chatId,
   className,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+}: ChatHeaderProps) {
   const [clearDialogOpen, setClearDialogOpen] = useState(false);
-  const clearAllMessages = useClearAllChatMessages();
+  const [addedDataSources, setAddedDataSources] = useState<DataSource[]>([]);
+  const { mutateAsync: clearChatMessages } = useClearAllChatMessages();
+
+  const handleAddDatasource = (ds: DataSource) => {
+    setAddedDataSources((prev) => [...prev, ds]);
+  };
+
+  const handleRemoveDataSource = (id: string) => {
+    setAddedDataSources((prev) => prev.filter((ds) => ds.id !== id));
+  };
 
   const handleClearMessages = () => {
-    clearAllMessages.mutate();
+    clearChatMessages(chatId);
     setClearDialogOpen(false);
   };
 
@@ -44,22 +74,47 @@ export function ChatHeader({
       )}
       {...props}
     >
-      <div className="flex items-center gap-3">
-        <div className="relative">
-          <Avatar className="h-9 w-9">
-            <AvatarImage src="/ai-avatar.png" alt="AI Assistant" />
-            <AvatarFallback>AI</AvatarFallback>
-          </Avatar>
-          <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-background bg-green-500" />
-        </div>
-
-        <div className="flex flex-col">
-          <h2 className="text-sm font-medium">AI Assistant</h2>
-          <p className="text-xs text-muted-foreground">Ready to help</p>
-        </div>
+      <div className="flex flex-col">
+        <h2 className="text-lg font-semibold md:text-xl">{chatTitle}</h2>
+        {lastActive && (
+          <p className="text-xs text-muted-foreground">
+            Last active: {lastActive.toLocaleString()}
+          </p>
+        )}
       </div>
 
-      <div className="flex items-center">
+      <div className="flex items-center gap-2">
+        {/* Data sources section with tooltips */}
+        {addedDataSources.length > 0 && (
+          <div className="flex -space-x-2 mr-2">
+            <TooltipProvider>
+              {addedDataSources.map((source) => (
+                <Tooltip key={source.id}>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="h-8 w-8 rounded-full p-0"
+                      onClick={() => handleRemoveDataSource(source.id)}
+                    >
+                      {source.icon}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{source.name}</p>
+                  </TooltipContent>
+                </Tooltip>
+              ))}
+            </TooltipProvider>
+          </div>
+        )}
+
+        {/* Add datasource button */}
+        <AddDatasourceToChatDialog
+          selectedDatasources={addedDataSources}
+          onAdd={handleAddDatasource}
+        />
+
+        {/* Settings dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" aria-label="Menu">
@@ -100,11 +155,8 @@ export function ChatHeader({
               <AlertDialogAction
                 onClick={handleClearMessages}
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                disabled={clearAllMessages.isPending}
               >
-                {clearAllMessages.isPending
-                  ? "Clearing..."
-                  : "Clear All Messages"}
+                Clear All Messages
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
