@@ -1,5 +1,7 @@
 "use client";
 
+import type React from "react";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -8,7 +10,7 @@ import { cn } from "@/lib/utils";
 import type { FileAttachment } from "@/lib/types/chat";
 import { FileType } from "@/lib/types/chat";
 import { ChatMessageList } from "./ChatMessageList";
-import { ChatInput, FileWithPath } from "./ChatInput";
+import { ChatInput, type FileWithPath } from "./ChatInput";
 import { useCreateChatMessage } from "@/hooks/chat/useCreateChatMessage";
 import useParseFile from "@/hooks/parsers/useParseFile";
 import { useGetChatMessages } from "@/hooks/chat/useGetChatMessages";
@@ -19,6 +21,7 @@ import { useCompletion } from "@ai-sdk/react";
 import { ChatHeader } from "./ChatHeader";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useUser } from "@clerk/nextjs";
+import { StagehandEmbed } from "../StagehandEmbed";
 
 const formSchema = z.object({
   message: z.string().min(1, "Message is required"),
@@ -214,12 +217,23 @@ export function ChatForm({
         {...props}
       >
         <ChatHeader />
-        <ChatMessageList
-          messages={messages ?? []}
-          streamingMessage={completion}
-          complete={complete}
-          isAnalyzing={isAnalyzing}
-        />
+
+        <div className="flex flex-1 overflow-hidden">
+          {/* Chat Messages */}
+          <div className=" w-full overflow-y-auto">
+            <ChatMessageList
+              messages={messages ?? []}
+              streamingMessage={completion}
+              complete={complete}
+              isAnalyzing={isAnalyzing}
+            />
+          </div>
+
+          {/* Insighter Panel - Fixed width */}
+          <div className="w-full max-w-[300px] border-l ">
+            <StagehandEmbed />
+          </div>
+        </div>
 
         <Form {...form}>
           <ChatInput
