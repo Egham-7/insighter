@@ -5,6 +5,7 @@ import { runStagehand, startBBSSession } from "@/stagehand/main";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Search, RefreshCw, ExternalLink } from "lucide-react";
+import { toast } from "sonner";
 
 export function StagehandEmbed() {
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -18,6 +19,7 @@ export function StagehandEmbed() {
       await runStagehand(sessionId);
     } catch (error) {
       console.error("Failed to start session:", error);
+      toast.error("Failed to start session");
     }
   }, []);
 
