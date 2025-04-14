@@ -10,15 +10,23 @@ const webSearchInputSchema = z.object({
   searchEngine: z.enum(["google", "bing", "duckduckgo"]).optional().default("google").describe("Search engine to use"),
 });
 
+// Define the output schema for the web search tool
+const webSearchOutputSchema = z.object({
+  results: z.string().describe("The search results in a structured format"),
+  bbsSession: z.any().describe("The complete Browserbase session object"),
+  debugUrl: z.string().nullable().describe("URL to debug the Browserbase session")
+});
+
 // Create the web search tool
 export const webSearch = createTool({
   id: "Web Search",
   description: "Performs a web search based on the provided instructions and returns the search results",
   inputSchema: webSearchInputSchema,
+  outputSchema: webSearchOutputSchema,
   execute: async ({ context }) => {
     try {
       // Start a new Browserbase session
-      const { sessionId } = await startBBSSession();
+      const bbsSession = await startBBSSession();
       
       // Create a new Stagehand instance
       const stagehand = new Stagehand({
@@ -27,7 +35,7 @@ export const webSearch = createTool({
         projectId: process.env.BROWSERBASE_PROJECT_ID,
         verbose: 1,
         logger: console.log,
-        browserbaseSessionID: sessionId,
+        browserbaseSessionID: bbsSession.sessionId,
         disablePino: true,
       });
       
@@ -50,12 +58,12 @@ export const webSearch = createTool({
         });
         
         // Get the debug URL
-        const debugUrl = `https://app.browserbase.io/sessions/${sessionId}`;
+        const debugUrl = `https://app.browserbase.io/sessions/${bbsSession.sessionId}`;
         
         // Return the result along with session ID and debug URL
         return { 
           results: result.message,
-          sessionId,
+          bbsSession,
           debugUrl
         };
       } finally {
@@ -66,10 +74,9 @@ export const webSearch = createTool({
       console.error("Error performing web search:", error);
       return {
         results: `An error occurred: ${error instanceof Error ? error.message : String(error)}`,
-        sessionId: null,
+        bbsSession: null,
         debugUrl: null
       };
     }
   }
 });
-
