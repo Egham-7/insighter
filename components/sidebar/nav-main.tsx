@@ -23,8 +23,8 @@ import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuButton,
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
@@ -153,7 +153,7 @@ function DeleteChatDialog({
         <Button
           variant="ghost"
           size="icon"
-          className="h-5 w-5 text-destructive "
+          className="h-5 w-5 text-destructive"
         >
           <Trash2 size={12} />
         </Button>
@@ -301,7 +301,7 @@ export function NavMain({
                             <span>{subItem.title}</span>
                           </a>
                         </SidebarMenuSubButton>
-                        <div className="flex items-center space-x-1 mr-2">
+                        <div className="flex items-center space-x-1 mr-2 opacity-0 absolute right-0 top-0 group-hover:opacity-100 transition-opacity duration-200">
                           <EditChatDialog
                             chatId={subItem.id}
                             chatTitle={subItem.title}

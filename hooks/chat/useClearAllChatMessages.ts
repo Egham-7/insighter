@@ -8,7 +8,7 @@ const useClearAllChatMessages = () => {
   const { db, loading, error } = useDatabase();
 
   const mutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (chatId: number) => {
       if (loading) {
         throw new Error("Database is loading");
       }
@@ -19,26 +19,24 @@ const useClearAllChatMessages = () => {
         throw new Error("Database not initialized");
       }
 
-      // Delete file attachments first due to foreign key constraints
-      await db.execute("DELETE FROM file_attachments");
-
-      // Delete all chat messages
-      await db.execute("DELETE FROM chat_messages");
+      // Delete all chat messages for the specific chat ID
+      // Due to ON DELETE CASCADE in the schema, this will automatically
+      // delete related file_attachments
+      await db.execute("DELETE FROM chat_messages WHERE chat_id = ?", [chatId]);
 
       return true;
     },
-    onSuccess: () => {
+    onSuccess: (_, chatId) => {
       // Invalidate all relevant queries
-      queryClient.invalidateQueries({ queryKey: ["messages"] });
+      queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
       queryClient.invalidateQueries({ queryKey: ["attachments"] });
-
-      toast.success("All chat messages cleared");
+      toast.success("Chat messages cleared");
     },
-    onError: (error) => {
+    onError: (error, chatId) => {
       toast.error(`Error clearing chat messages: ${error.message}`, {
         action: {
           label: "Retry",
-          onClick: () => mutation.mutate(),
+          onClick: () => mutation.mutate(chatId),
         },
       });
     },
