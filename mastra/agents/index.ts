@@ -105,5 +105,3 @@ export const researchNetwork = new AgentNetwork({
    model: openai('gpt-4o'),
    agents: [dataAnalystAgent4o, consultantAgent],  
  });
-  
- 
