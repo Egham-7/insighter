@@ -47,29 +47,20 @@ export async function runStagehand(sessionId?: string) {
 }
 
 /**
- * Interface for Browserbase session information
- */
-export interface BrowserbaseSessionInfo {
-  sessionId: string;
-  debuggerUrl: string;
-  createdAt: Date;
-  status: 'active' | 'pending';
-}
-
-/**
  * Start a Browserbase session
  */
-export async function startBBSSession(): Promise<BrowserbaseSessionInfo> {
+export async function startBBSSession() {
   const browserbase = new Browserbase();
   const session = await browserbase.sessions.create({
     projectId: process.env.BROWSERBASE_PROJECT_ID!,
   });
   const debugUrl = await browserbase.sessions.debug(session.id);
-  
+
   return {
     sessionId: session.id,
     debuggerUrl: debugUrl.debuggerFullscreenUrl,
     createdAt: new Date(),
-    status: 'active'
+    status: "active",
   };
 }
+
