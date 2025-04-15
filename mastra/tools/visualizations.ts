@@ -21,6 +21,11 @@ const visualizationInputSchema = z.object({
   yField: z.string().describe("Field name (key) to use for the y-axis"),
 });
 
+const visualizationOutputSchema = z.object({
+  step: z.string().describe("The step in the process"),
+  results: z.string().describe("The results of the visualization"),
+});
+
 // Function to generate Mermaid syntax based on the chart type
 const generateMermaidSyntax = (
   chartType: string,
@@ -160,6 +165,7 @@ const generateMermaidSyntax = (
 export const createVisualization = createTool({
   id: "Create Visualization",
   inputSchema: visualizationInputSchema,
+  outputSchema: visualizationOutputSchema,
   description: `Generates a Mermaid diagram based on the provided data (as a JSON string representing an array of objects) and chart type. Values in objects can be string, number, boolean, or null. Supported chart types: bar, line, pie, flowchart, gantt.`,
   execute: async ({
     context: { chartType, title, xAxis, yAxis, data, xField, yField },
@@ -174,17 +180,17 @@ export const createVisualization = createTool({
         xField,
         yField,
       );
-      return { mermaidSyntax };
+      return {
+        results: mermaidSyntax,
+        step: "visualization",
+      };
     } catch (error) {
       console.error("Error generating visualization:", error);
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error";
       return {
-        mermaidSyntax: `
-          graph TD
-              A[Error] --> B[Failed to generate visualization]
-              B --> C["${errorMessage.replace(/"/g, "'")}"]
-        `,
+        results: `Error generating visualization: ${errorMessage}`,
+        step: "error",
       };
     }
   },
