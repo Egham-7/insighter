@@ -21,7 +21,7 @@ import { useCompletion } from "@ai-sdk/react";
 import { ChatHeader } from "./ChatHeader";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useUser } from "@clerk/nextjs";
-import { StagehandEmbed } from "../StagehandEmbed";
+import { useGetChat } from "@/hooks/chat/useGetChat";
 
 const formSchema = z.object({
   message: z.string().min(1, "Message is required"),
@@ -33,7 +33,11 @@ export function ChatForm({
   ...props
 }: React.ComponentProps<"div"> & { chatId: number }) {
   const [attachedFiles, setAttachedFiles] = useState<FileWithPath[]>([]);
-  const { data: messages, isLoading, isError } = useGetChatMessages(chatId);
+  const {
+    data: messages,
+    isLoading,
+    isError: isChatMessagesError,
+  } = useGetChatMessages(chatId);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -47,7 +51,10 @@ export function ChatForm({
   const { user, isLoaded, isSignedIn } = useUser();
 
   const { mutateAsync: createChatMessage } = useCreateChatMessage();
+  const { data: chat, isError: isChatError } = useGetChat(chatId);
   const { mutateAsync: parseFile } = useParseFile();
+
+  const isError = isChatMessagesError || isChatError || !chat;
 
   const {
     completion,
@@ -216,7 +223,7 @@ export function ChatForm({
         )}
         {...props}
       >
-        <ChatHeader />
+        <ChatHeader chatTitle={chat.title} chatId={chat.id} />
 
         <div className="flex flex-1 overflow-hidden">
           {/* Chat Messages */}
@@ -227,11 +234,6 @@ export function ChatForm({
               complete={complete}
               isAnalyzing={isAnalyzing}
             />
-          </div>
-
-          {/* Insighter Panel - Fixed width */}
-          <div className="w-full max-w-[300px] border-l ">
-            <StagehandEmbed />
           </div>
         </div>
 
