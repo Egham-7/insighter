@@ -55,8 +55,12 @@ export async function startBBSSession() {
     projectId: process.env.BROWSERBASE_PROJECT_ID!,
   });
   const debugUrl = await browserbase.sessions.debug(session.id);
+
   return {
     sessionId: session.id,
-    debugUrl: debugUrl.debuggerFullscreenUrl,
+    debuggerUrl: debugUrl.debuggerFullscreenUrl,
+    createdAt: new Date(),
+    status: "active",
   };
 }
+

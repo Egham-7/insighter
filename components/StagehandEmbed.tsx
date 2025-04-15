@@ -13,9 +13,9 @@ export function StagehandEmbed() {
 
   const startSession = useCallback(async () => {
     try {
-      const { sessionId, debugUrl } = await startBBSSession();
+      const { sessionId, debuggerUrl } = await startBBSSession();
       setSessionId(sessionId);
-      setDebugUrl(debugUrl);
+      setDebugUrl(debuggerUrl);
       await runStagehand(sessionId);
     } catch (error) {
       console.error("Failed to start session:", error);
@@ -88,3 +88,4 @@ export function StagehandEmbed() {
     </Card>
   );
 }
+

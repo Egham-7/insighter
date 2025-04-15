@@ -20,7 +20,7 @@ function errorHandler(error: unknown) {
 export async function POST(request: NextRequest) {
   try {
     const { inputData, prompt, resourceId, threadId } = await request.json();
-    const agent = mastra.getAgent("dataAnalystAgent4o");
+    const analysisAgent = mastra.getAgent("dataAnalystAgent4o");
 
     console.log("Input Data:", inputData);
 
@@ -28,13 +28,12 @@ export async function POST(request: NextRequest) {
     Prompt: 
       ${prompt}
 
-Call the create visualization tool
 
     Data: 
       ${JSON.stringify(inputData)}
 `;
 
-    const stream = await agent.stream(formattedPrompt, {
+    const stream = await analysisAgent.stream(formattedPrompt, {
       resourceId,
       threadId,
       maxSteps: 5, // Allow up to 5 tool usage steps
@@ -56,6 +55,8 @@ Call the create visualization tool
 
     return stream.toDataStreamResponse({
       getErrorMessage: errorHandler,
+      sendReasoning: true,
+      sendSources: true,
     });
   } catch (error) {
     console.error("Error processing request:", error);

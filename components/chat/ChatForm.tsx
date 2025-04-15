@@ -80,7 +80,7 @@ export function ChatForm({
       });
     },
   });
-
+  console.log(completion);
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       // Prepare files for processing
