@@ -11,6 +11,7 @@ export function isFileType(value: string): value is FileType {
 }
 
 export interface FileAttachment {
+  readonly id: number;
   readonly file_name: string;
   readonly file_type: FileType;
   readonly data: string;
@@ -20,7 +21,15 @@ export interface FileAttachment {
 export interface ChatMessage {
   readonly id: number;
   readonly role: ChatRole;
+  readonly chat_id: number;
   readonly content: string;
   attachments?: readonly FileAttachment[];
   readonly timestamp: number;
+}
+
+export interface Chat {
+  readonly id: number;
+  readonly title: string;
+  readonly created_at: number; // Unix timestamp
+  readonly user_id: string;
 }

@@ -45,47 +45,87 @@ export const useUpdateChatMessage = () => {
         ...updates,
       };
 
-      // Update the message in the database
-      await db.execute(
-        "UPDATE chat_messages SET role = ?, content = ?, timestamp = ? WHERE id = ?",
-        [
-          updatedMessage.role,
-          updatedMessage.content,
-          updatedMessage.timestamp,
-          updatedMessage.id,
-        ],
-      );
+      try {
+        // First, get the chat_id and timestamp of the message to be updated
+        const messageData = (await db.select(
+          "SELECT chat_id, timestamp FROM chat_messages WHERE id = ?",
+          [id],
+        )) as ChatMessage[];
 
-      // Handle attachments if they exist in the updates
-      if (updates.attachments) {
-        // Delete existing attachments
-        await db.execute(
-          "DELETE FROM file_attachments WHERE chat_message_id = ?",
-          [updatedMessage.id],
-        );
+        if (!messageData || messageData.length === 0) {
+          throw new Error("Message not found");
+        }
 
-        // Insert new attachments
-        for (const attachment of updates.attachments) {
+        const chatId = messageData[0].chat_id;
+        const messageTimestamp = messageData[0].timestamp;
+
+        // Get all message IDs that will be deleted to handle attachments
+        const messagesToDelete = (await db.select(
+          "SELECT id FROM chat_messages WHERE chat_id = ? AND timestamp > ?",
+          [chatId, messageTimestamp],
+        )) as { id: number }[];
+
+        // Delete attachments for all messages that will be deleted
+        for (const message of messagesToDelete) {
           await db.execute(
-            "INSERT INTO file_attachments (chat_message_id, file_name, file_type, data) VALUES (?, ?, ?, ?)",
-            [
-              updatedMessage.id,
-              attachment.file_name,
-              attachment.file_type,
-              JSON.stringify(attachment.data),
-            ],
+            "DELETE FROM file_attachments WHERE chat_message_id = ?",
+            [message.id],
           );
         }
-      }
 
-      return updatedMessage;
+        // Delete all messages created after this one in the same chat, but not this one itself
+        await db.execute(
+          "DELETE FROM chat_messages WHERE chat_id = ? AND timestamp > ?",
+          [chatId, messageTimestamp],
+        );
+
+        // Update the message in the database
+        await db.execute(
+          "UPDATE chat_messages SET role = ?, content = ?, timestamp = ? WHERE id = ?",
+          [
+            updatedMessage.role,
+            updatedMessage.content,
+            updatedMessage.timestamp,
+            updatedMessage.id,
+          ],
+        );
+
+        // Handle attachments if they exist in the updates
+        if (updates.attachments) {
+          // Delete existing attachments
+          await db.execute(
+            "DELETE FROM file_attachments WHERE chat_message_id = ?",
+            [updatedMessage.id],
+          );
+
+          // Insert new attachments
+          for (const attachment of updates.attachments) {
+            await db.execute(
+              "INSERT INTO file_attachments (chat_message_id, file_name, file_type, data) VALUES (?, ?, ?, ?)",
+              [
+                updatedMessage.id,
+                attachment.file_name,
+                attachment.file_type,
+                attachment.data,
+              ],
+            );
+          }
+        }
+
+        return updatedMessage;
+      } catch (error) {
+        throw error;
+      }
     },
     onSuccess: (updatedMessage) => {
       queryClient.invalidateQueries({
         queryKey: ["message", updatedMessage.id],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["messages", updatedMessage.chat_id],
+      });
       queryClient.invalidateQueries({ queryKey: ["messages"] });
-      toast.success("Message updated successfully");
+      toast.success("Message updated");
     },
     onError: (error, variables) => {
       toast.error(`Failed to update message: ${error.message}`, {

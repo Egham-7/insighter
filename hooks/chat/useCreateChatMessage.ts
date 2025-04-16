@@ -21,11 +21,12 @@ export const useCreateChatMessage = () => {
 
       // Insert the new message into the database
       const result = await db.execute(
-        "INSERT INTO chat_messages (role, content, timestamp) VALUES (?, ?, ?)",
+        "INSERT INTO chat_messages (chat_id, role, content, timestamp) VALUES (?, ?, ?, ?)",
         [
+          newMessage.chat_id,
           newMessage.role,
           newMessage.content,
-          newMessage.timestamp || new Date().toISOString(),
+          newMessage.timestamp || Math.floor(Date.now() / 1000), // Using Unix timestamp as INTEGER
         ],
       );
 
@@ -41,7 +42,7 @@ export const useCreateChatMessage = () => {
               messageId,
               attachment.file_name,
               attachment.file_type,
-              JSON.stringify(attachment.data),
+              attachment.data,
             ],
           );
         }
@@ -56,8 +57,8 @@ export const useCreateChatMessage = () => {
     onSuccess: (data) => {
       // Invalidate relevant queries to refresh the data
       queryClient.invalidateQueries({ queryKey: ["messages"] });
+      queryClient.invalidateQueries({ queryKey: ["messages", data.chat_id] });
       queryClient.invalidateQueries({ queryKey: ["message", data.id] });
-      toast.success("Message created successfully");
     },
     onError: (error) => {
       toast.error(`Failed to create message: ${error.message}`, {

@@ -25,6 +25,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { SignOutButton } from "@clerk/nextjs";
 
 export function NavUser({
   user,
@@ -100,7 +101,7 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <LogOut />
-              Log out
+              <SignOutButton>Log out</SignOutButton>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
