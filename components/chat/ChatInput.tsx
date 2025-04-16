@@ -48,7 +48,7 @@ export function ChatInput({
 }: ChatInputProps) {
   const validateFiles = (files: FileWithPath[]): boolean => {
     return files.every((file) =>
-      ALLOWED_FILE_TYPES.some((type) => file.name.endsWith(type)),
+      ALLOWED_FILE_TYPES.some((type) => file.name.endsWith(type))
     );
   };
 
