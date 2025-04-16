@@ -22,7 +22,7 @@ import { ChatHeader } from "./ChatHeader";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useUser } from "@clerk/nextjs";
 import { useGetChat } from "@/hooks/chat/useGetChat";
-
+import { useRef } from "react";
 const formSchema = z.object({
   message: z.string().min(1, "Message is required"),
 });
@@ -55,6 +55,7 @@ export function ChatForm({
   const { mutateAsync: parseFile } = useParseFile();
 
   const isError = isChatMessagesError || isChatError || !chat;
+  const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const {
     completion,
@@ -72,6 +73,9 @@ export function ChatForm({
         chat_id: chatId,
       });
       setCompletion("");
+      if (bottomRef.current) {
+        bottomRef.current.scrollIntoView({ behavior: "smooth" });
+      }
     },
     onError: (error) => {
       console.error("Error in completion:", error);
@@ -234,6 +238,7 @@ export function ChatForm({
               complete={complete}
               isAnalyzing={isAnalyzing}
             />
+            <div ref={bottomRef} />
           </div>
         </div>
 
