@@ -8,19 +8,14 @@ import { useUser } from "@clerk/nextjs";
 import { useDatabase } from "@/hooks/use-db";
 
 export default function HomePage() {
-<<<<<<< HEAD
-  const { data: messages, isLoading, isError } = useGetAllChatMessages();
-  console.log(messages);
-=======
   const router = useRouter();
   const { loading: dbLoading, error: dbError } = useDatabase();
   const { mutateAsync: createChat } = useCreateChat();
   const { user, isLoaded, isSignedIn } = useUser();
->>>>>>> 70a543256c10e0db1dc24b1f1f2986a3f67eb303
 
   // Fetch existing chats for the user
   const { data: chats, isLoading: isChatsLoading } = useGetChats(
-    user?.id || "",
+    user?.id || ""
   );
 
   useEffect(() => {
