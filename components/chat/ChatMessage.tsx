@@ -3,12 +3,13 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import type { ChatMessage as ChatMessageType } from "@/lib/types/chat";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, RotateCcw } from "lucide-react";
+import { Edit, Trash2, RotateCcw, Copy as CopyIcon, Check } from "lucide-react";
 import { EditMessageForm } from "./EditMessageForm";
 import useDeleteChatMessage from "@/hooks/chat/useDeleteChatMessage";
 import MarkdownRenderer from "../MarkdownRenderer";
 import { useUpdateChatMessage } from "@/hooks/chat/useUpdateChatMessage";
 import { useUser } from "@clerk/nextjs";
+import { toast } from "sonner";
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -16,13 +17,7 @@ interface ChatMessageProps {
     prompt: string,
     options?:
       | {
-          /**
-           * An optional object of headers to be passed to the API endpoint.
-           */
           headers?: Record<string, string> | Headers;
-          /**
-           * An optional object to be passed to the API endpoint.
-           */
           body?: object;
         }
       | undefined,
@@ -30,6 +25,30 @@ interface ChatMessageProps {
   isAnalyzing: boolean;
 }
 
+function CopyButton({ content }: { content: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(content);
+    setCopied(true);
+    toast.success("Copied to clipboard!");
+    setTimeout(() => setCopied(false), 1200);
+  };
+
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      className="h-7 w-7 rounded-full"
+      onClick={handleCopy}
+      title="Copy"
+      aria-label="Copy message"
+    >
+      {copied ? <Check size={14} /> : <CopyIcon size={14} />}
+      <span className="sr-only">Copy message</span>
+    </Button>
+  );
+}
 // Message Action Buttons Component
 function MessageActions({
   messageId,
@@ -58,7 +77,6 @@ function MessageActions({
           disabled={isLoading}
         >
           <RotateCcw size={14} className={cn(isLoading && "animate-spin")} />
-
           <span className="sr-only">Retry message</span>
         </Button>
         <Button
@@ -83,6 +101,7 @@ function MessageActions({
           <Trash2 size={14} />
           <span className="sr-only">Delete message</span>
         </Button>
+        <CopyButton content={messageContent} />
       </div>
     </div>
   );
@@ -108,25 +127,31 @@ export function ChatMessage({
 
 function AIMessage({ message }: { message: ChatMessageType }) {
   return (
-    <div className="mb-6 flex w-full px-12">
-      <MarkdownRenderer content={message.content} />
-      {message.attachments && message.attachments.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {message.attachments.map((attachment, i) => (
-            <div
-              key={i}
-              className="relative h-24 w-24 overflow-hidden rounded-lg border"
-            >
-              <Image
-                src={"/images/csv.png"}
-                alt={attachment.file_name}
-                fill
-                className="object-cover"
-              />
-            </div>
-          ))}
-        </div>
-      )}
+    <div className="mb-6 flex flex-col w-full  group">
+      <div className="flex-1">
+        <MarkdownRenderer content={message.content} />
+        {message.attachments && message.attachments.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {message.attachments.map((attachment, i) => (
+              <div
+                key={i}
+                className="relative h-24 w-24 overflow-hidden rounded-lg border"
+              >
+                <Image
+                  src={"/images/csv.png"}
+                  alt={attachment.file_name}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      {/* Copy button for AI message */}
+      <div className=" ml-4 flex items-start opacity-0 group-hover:opacity-100 transition-opacity">
+        <CopyButton content={message.content} />
+      </div>
     </div>
   );
 }
@@ -209,14 +234,16 @@ function UserMessage({
             </div>
           )}
         </div>
-        <MessageActions
-          messageId={message.id}
-          messageContent={message.content}
-          onEdit={() => setIsEditing(true)}
-          onDelete={handleDelete}
-          onRetry={handleRetry}
-          isLoading={isLoading}
-        />
+        <div className="flex justify-end mt-2 gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <MessageActions
+            messageId={message.id}
+            messageContent={message.content}
+            onEdit={() => setIsEditing(true)}
+            onDelete={handleDelete}
+            onRetry={handleRetry}
+            isLoading={isLoading}
+          />
+        </div>
       </div>
     </div>
   );
