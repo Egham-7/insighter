@@ -45,12 +45,12 @@ export default function Features() {
       <div className="mx-auto max-w-5xl space-y-8 px-6 md:space-y-16 lg:space-y-20 dark:[--color-border:color-mix(in_oklab,var(--color-white)_10%,transparent)]">
         <div className="relative z-10 mx-auto max-w-2xl space-y-6 text-center">
           <h2 className="text-balance text-4xl font-semibold lg:text-6xl">
-            The foundation for AI
+            Unlock Your Business Potential with AI
           </h2>
           <p>
-            Lyra is evolving to be more than just the models. It supports an
-            entire to the APIs and platforms helping developers and businesses
-            innovate.
+            Insighter connects to your data and uses advanced AI to surface the
+            key insights you need to grow, optimize, and make informed
+            decisions.
           </p>
         </div>
 
@@ -65,52 +65,51 @@ export default function Features() {
               <AccordionTrigger>
                 <div className="flex items-center gap-2 text-base">
                   <Database className="size-4" />
-                  Database Visualization
+                  Seamless Data Connection
                 </div>
               </AccordionTrigger>
               <AccordionContent>
-                Lyra is evolving to be more than just the models. It supports an
-                entire to the APIs and platforms helping developers and
-                businesses innovate.
+                Easily connect Insighter to your existing databases, Meta Ads,
+                or upload a csv file to get a holistic view of your operations.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2">
               <AccordionTrigger>
                 <div className="flex items-center gap-2 text-base">
                   <Fingerprint className="size-4" />
-                  Advanced Authentication
+                  Automated Insight Generation
                 </div>
               </AccordionTrigger>
               <AccordionContent>
-                Lyra is evolving to be more than just the models. It supports an
-                entire to the APIs and platforms helping developers and
-                businesses innovate.
+                Let our AI analyze your connected data to automatically identify
+                trends, anomalies, opportunities, and potential risks you might
+                have missed.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-3">
               <AccordionTrigger>
                 <div className="flex items-center gap-2 text-base">
                   <IdCard className="size-4" />
-                  Identity Management
+                  Customizable Reporting
                 </div>
               </AccordionTrigger>
               <AccordionContent>
-                Lyra is evolving to be more than just the models. It supports an
-                entire to the APIs and platforms helping developers and
-                businesses innovate.
+                Build and customize reports and dashboards that matter most to
+                your team. Track KPIs and visualize progress towards your
+                business goals effortlessly.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-4">
               <AccordionTrigger>
                 <div className="flex items-center gap-2 text-base">
                   <ChartBarIncreasingIcon className="size-4" />
-                  Analytics Dashboard
+                  Real-time Business Analytics
                 </div>
               </AccordionTrigger>
               <AccordionContent>
-                Lyra is evolving to be more than just the models. It supports an
-                entire to the APIs and platforms helping developers and
-                businesses innovate.
+                Monitor key metrics and performance indicators in real-time. Get
+                up-to-the-minute information to react quickly to changing market
+                conditions.
               </AccordionContent>
             </AccordionItem>
           </Accordion>

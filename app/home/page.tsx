@@ -15,7 +15,7 @@ export default function HomePage() {
 
   // Fetch existing chats for the user
   const { data: chats, isLoading: isChatsLoading } = useGetChats(
-    user?.id || "",
+    user?.id || ""
   );
 
   useEffect(() => {
