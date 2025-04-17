@@ -3,12 +3,15 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import type { ChatMessage as ChatMessageType } from "@/lib/types/chat";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, RotateCcw } from "lucide-react";
+import { Edit, Trash2, RotateCcw, Download } from "lucide-react";
 import { EditMessageForm } from "./EditMessageForm";
 import useDeleteChatMessage from "@/hooks/chat/useDeleteChatMessage";
 import MarkdownRenderer from "../MarkdownRenderer";
 import { useUpdateChatMessage } from "@/hooks/chat/useUpdateChatMessage";
 import { useUser } from "@clerk/nextjs";
+import { toast } from "sonner";
+import { downloadDir } from "@tauri-apps/api/path";
+import { invoke } from "@tauri-apps/api/core";
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -16,13 +19,7 @@ interface ChatMessageProps {
     prompt: string,
     options?:
       | {
-          /**
-           * An optional object of headers to be passed to the API endpoint.
-           */
           headers?: Record<string, string> | Headers;
-          /**
-           * An optional object to be passed to the API endpoint.
-           */
           body?: object;
         }
       | undefined,
@@ -58,7 +55,6 @@ function MessageActions({
           disabled={isLoading}
         >
           <RotateCcw size={14} className={cn(isLoading && "animate-spin")} />
-
           <span className="sr-only">Retry message</span>
         </Button>
         <Button
@@ -107,26 +103,57 @@ export function ChatMessage({
 }
 
 function AIMessage({ message }: { message: ChatMessageType }) {
+  const handleExportPDF = async () => {
+    try {
+      const downloadsPath = await downloadDir();
+      const fileName = `message-${message.id}.pdf`;
+      const filePath = `${downloadsPath}/${fileName}`;
+
+      await invoke("markdown_to_pdf", {
+        message: message.content,
+        pdfPath: filePath,
+      });
+
+      toast.success(`PDF exported to Downloads as ${fileName}`);
+    } catch (error) {
+      console.error("Failed to export PDF:", error);
+      toast.error("Could not export PDF");
+    }
+  };
+
   return (
-    <div className="mb-6 flex w-full px-12">
-      <MarkdownRenderer content={message.content} />
-      {message.attachments && message.attachments.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {message.attachments.map((attachment, i) => (
-            <div
-              key={i}
-              className="relative h-24 w-24 overflow-hidden rounded-lg border"
-            >
-              <Image
-                src={"/images/csv.png"}
-                alt={attachment.file_name}
-                fill
-                className="object-cover"
-              />
-            </div>
-          ))}
-        </div>
-      )}
+    <div className="mb-6 flex w-full px-12 group relative">
+      <div className="flex-1">
+        <MarkdownRenderer content={message.content} />
+        {message.attachments && message.attachments.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {message.attachments.map((attachment, i) => (
+              <div
+                key={i}
+                className="relative h-24 w-24 overflow-hidden rounded-lg border"
+              >
+                <Image
+                  src={"/images/csv.png"}
+                  alt={attachment.file_name}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <div className="absolute right-0 bottom-0 flex justify-end mt-2">
+        <Button
+          onClick={handleExportPDF}
+          variant="ghost"
+          size="sm"
+          title="Export as PDF"
+        >
+          <Download className="w-4 h-4 mr-2" />
+          Export as PDF
+        </Button>
+      </div>
     </div>
   );
 }
@@ -190,7 +217,7 @@ function UserMessage({
             "bg-primary text-primary-foreground",
           )}
         >
-          <p className="text-sm">{message.content}</p>
+          <MarkdownRenderer content={message.content} />
           {message.attachments && message.attachments.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-2">
               {message.attachments.map((attachment, i) => (

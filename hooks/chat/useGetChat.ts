@@ -10,10 +10,10 @@ export const useGetChat = (id: number) => {
     queryKey: ["chat", id],
     queryFn: async () => {
       if (loading) {
-        throw new Error("Database is loading");
+        return;
       }
       if (error) {
-        throw new Error("Error loading database");
+        throw new Error("Error loading database.");
       }
       if (!db) {
         throw new Error("Database not initialized");

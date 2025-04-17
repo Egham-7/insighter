@@ -12,10 +12,10 @@ export const useDeleteChat = () => {
   const mutation = useMutation({
     mutationFn: async (id: number) => {
       if (loading) {
-        throw new Error("Database is loading");
+        return;
       }
       if (error) {
-        throw new Error("Error loading database");
+        throw new Error("Error loading database.");
       }
       if (!db) {
         throw new Error("Database not initialized");
@@ -61,9 +61,9 @@ export const useDeleteChat = () => {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["chats"] });
-      queryClient.invalidateQueries({ queryKey: ["chats", data.userId] });
-      queryClient.invalidateQueries({ queryKey: ["chat", data.id] });
-      queryClient.invalidateQueries({ queryKey: ["messages", data.id] });
+      queryClient.invalidateQueries({ queryKey: ["chats", data?.userId] });
+      queryClient.invalidateQueries({ queryKey: ["chat", data?.id] });
+      queryClient.invalidateQueries({ queryKey: ["messages", data?.id] });
       toast.success("Chat deleted successfully");
     },
     onError: (error, id) => {

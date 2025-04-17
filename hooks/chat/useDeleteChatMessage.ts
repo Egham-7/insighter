@@ -11,7 +11,7 @@ const useDeleteChatMessage = () => {
   const mutation = useMutation({
     mutationFn: async (id: number) => {
       if (loading) {
-        throw new Error("Database is loading");
+        return;
       }
       if (error) {
         throw new Error("Error loading database");
@@ -61,8 +61,8 @@ const useDeleteChatMessage = () => {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["messages"] });
-      queryClient.invalidateQueries({ queryKey: ["messages", data.chatId] });
-      queryClient.invalidateQueries({ queryKey: ["message", data.id] });
+      queryClient.invalidateQueries({ queryKey: ["messages", data?.chatId] });
+      queryClient.invalidateQueries({ queryKey: ["message", data?.id] });
       toast.success("Message and subsequent responses deleted");
     },
     onError: (error, id) => {

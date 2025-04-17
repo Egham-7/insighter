@@ -12,7 +12,7 @@ export function useGetMessage(id: number) {
     queryKey: ["message", id],
     queryFn: async () => {
       if (loading) {
-        throw new Error("Database is loading");
+        return;
       }
 
       if (error) {

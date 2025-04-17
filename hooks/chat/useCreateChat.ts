@@ -10,6 +10,11 @@ export const useCreateChat = () => {
 
   const mutation = useMutation({
     mutationFn: async (newChat: Omit<Chat, "id">) => {
+      if (loading) return;
+      if (error) {
+        throw new Error("Error loading database.");
+      }
+
       if (!db) {
         throw new Error("Database not initialized");
       }
@@ -36,8 +41,8 @@ export const useCreateChat = () => {
     onSuccess: (data) => {
       // Invalidate relevant queries to refresh the data
       queryClient.invalidateQueries({ queryKey: ["chats"] });
-      queryClient.invalidateQueries({ queryKey: ["chats", data.user_id] });
-      queryClient.invalidateQueries({ queryKey: ["chat", data.id] });
+      queryClient.invalidateQueries({ queryKey: ["chats", data?.user_id] });
+      queryClient.invalidateQueries({ queryKey: ["chat", data?.id] });
       toast.success("Chat created successfully");
     },
     onError: (error) => {
@@ -50,20 +55,6 @@ export const useCreateChat = () => {
       });
     },
   });
-
-  // Return null mutation when database is not ready
-  if (loading || error || !db) {
-    return {
-      ...mutation,
-      mutate: () => {
-        toast.error(
-          error?.message || "Database not ready. Please try again in a moment.",
-        );
-        return Promise.reject(new Error("Database not ready"));
-      },
-      mutateAsync: () => Promise.reject(new Error("Database not ready")),
-    };
-  }
 
   return mutation;
 };
