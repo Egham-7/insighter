@@ -3,7 +3,14 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import type { ChatMessage as ChatMessageType } from "@/lib/types/chat";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, RotateCcw, Download } from "lucide-react";
+import {
+  Edit,
+  Trash2,
+  RotateCcw,
+  Copy as CopyIcon,
+  Check,
+  Download,
+} from "lucide-react";
 import { EditMessageForm } from "./EditMessageForm";
 import useDeleteChatMessage from "@/hooks/chat/useDeleteChatMessage";
 import MarkdownRenderer from "../MarkdownRenderer";
@@ -27,7 +34,75 @@ interface ChatMessageProps {
   isAnalyzing: boolean;
 }
 
-// Message Action Buttons Component
+function CopyButton({ content }: { content: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(content);
+    setCopied(true);
+    toast.success("Copied to clipboard!");
+    setTimeout(() => setCopied(false), 1200);
+  };
+
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      className="h-7 w-7 rounded-full"
+      onClick={handleCopy}
+      title="Copy"
+      aria-label="Copy message"
+    >
+      {copied ? <Check size={14} /> : <CopyIcon size={14} />}
+      <span className="sr-only">Copy message</span>
+    </Button>
+  );
+}
+
+function ExportPDFButton({ message }: { message: ChatMessageType }) {
+  const handleExportPDF = async () => {
+    try {
+      const downloadsPath = await downloadDir();
+      const fileName = `message-${message.id}.pdf`;
+      const filePath = `${downloadsPath}/${fileName}`;
+
+      await invoke("markdown_to_pdf", {
+        message: message.content,
+        pdfPath: filePath,
+      });
+
+      toast.success(`PDF exported to Downloads as ${fileName}`);
+    } catch (error) {
+      console.error("Failed to export PDF:", error);
+      toast.error("Could not export PDF");
+    }
+  };
+
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      className="h-7 w-7 rounded-full"
+      onClick={handleExportPDF}
+      title="Export as PDF"
+      aria-label="Export as PDF"
+    >
+      <Download size={14} />
+      <span className="sr-only">Export as PDF</span>
+    </Button>
+  );
+}
+
+function AIMessageActions({ message }: { message: ChatMessageType }) {
+  return (
+    <div className="ml-4 flex items-start gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute right-0 top-0">
+      <CopyButton content={message.content} />
+      <ExportPDFButton message={message} />
+    </div>
+  );
+}
+
+// Message Action Buttons Component for user messages
 function MessageActions({
   messageId,
   messageContent,
@@ -79,6 +154,7 @@ function MessageActions({
           <Trash2 size={14} />
           <span className="sr-only">Delete message</span>
         </Button>
+        <CopyButton content={messageContent} />
       </div>
     </div>
   );
@@ -103,26 +179,8 @@ export function ChatMessage({
 }
 
 function AIMessage({ message }: { message: ChatMessageType }) {
-  const handleExportPDF = async () => {
-    try {
-      const downloadsPath = await downloadDir();
-      const fileName = `message-${message.id}.pdf`;
-      const filePath = `${downloadsPath}/${fileName}`;
-
-      await invoke("markdown_to_pdf", {
-        message: message.content,
-        pdfPath: filePath,
-      });
-
-      toast.success(`PDF exported to Downloads as ${fileName}`);
-    } catch (error) {
-      console.error("Failed to export PDF:", error);
-      toast.error("Could not export PDF");
-    }
-  };
-
   return (
-    <div className="mb-6 flex w-full px-12 group relative">
+    <div className="mb-6 flex flex-col w-full group relative">
       <div className="flex-1">
         <MarkdownRenderer content={message.content} />
         {message.attachments && message.attachments.length > 0 && (
@@ -143,17 +201,7 @@ function AIMessage({ message }: { message: ChatMessageType }) {
           </div>
         )}
       </div>
-      <div className="absolute right-0 bottom-0 flex justify-end mt-2">
-        <Button
-          onClick={handleExportPDF}
-          variant="ghost"
-          size="sm"
-          title="Export as PDF"
-        >
-          <Download className="w-4 h-4 mr-2" />
-          Export as PDF
-        </Button>
-      </div>
+      <AIMessageActions message={message} />
     </div>
   );
 }
@@ -236,14 +284,16 @@ function UserMessage({
             </div>
           )}
         </div>
-        <MessageActions
-          messageId={message.id}
-          messageContent={message.content}
-          onEdit={() => setIsEditing(true)}
-          onDelete={handleDelete}
-          onRetry={handleRetry}
-          isLoading={isLoading}
-        />
+        <div className="flex justify-end mt-2 gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <MessageActions
+            messageId={message.id}
+            messageContent={message.content}
+            onEdit={() => setIsEditing(true)}
+            onDelete={handleDelete}
+            onRetry={handleRetry}
+            isLoading={isLoading}
+          />
+        </div>
       </div>
     </div>
   );
