@@ -18,7 +18,7 @@ export const useUpdateChat = () => {
       updates: Partial<Chat>;
     }) => {
       if (loading) {
-        throw new Error("Database is loading");
+        return;
       }
       if (error) {
         throw new Error("Error loading database");
@@ -56,9 +56,9 @@ export const useUpdateChat = () => {
     onSuccess: (updatedChat) => {
       queryClient.invalidateQueries({ queryKey: ["chats"] });
       queryClient.invalidateQueries({
-        queryKey: ["chats", updatedChat.user_id],
+        queryKey: ["chats", updatedChat?.user_id],
       });
-      queryClient.invalidateQueries({ queryKey: ["chat", updatedChat.id] });
+      queryClient.invalidateQueries({ queryKey: ["chat", updatedChat?.id] });
       toast.success("Chat updated successfully");
     },
     onError: (error, variables) => {

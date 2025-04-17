@@ -10,13 +10,13 @@ const useClearAllChatMessages = () => {
   const mutation = useMutation({
     mutationFn: async (chatId: number) => {
       if (loading) {
-        throw new Error("Database is loading");
+        return;
       }
       if (error) {
         throw new Error("Error loading database");
       }
       if (!db) {
-        throw new Error("Database not initialized");
+        throw new Error("Database not found.");
       }
 
       // Delete all chat messages for the specific chat ID

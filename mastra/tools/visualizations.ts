@@ -95,7 +95,7 @@ const generateMermaidSyntax = (
       `;
     case "line":
       return `
-        xychart
+        xychart-beta
             title "${title}"
             x-axis ${xAxis}
             y-axis "${yAxis}" 0 --> 10000

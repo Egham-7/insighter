@@ -10,7 +10,7 @@ export const useGetChats = (userId: string) => {
     queryKey: ["chats", userId],
     queryFn: async () => {
       if (loading) {
-        throw new Error("Database is loading");
+        return;
       }
       if (error) {
         throw new Error("Error loading database");

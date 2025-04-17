@@ -9,11 +9,9 @@ export const useCreateChatMessage = () => {
 
   const mutation = useMutation({
     mutationFn: async (newMessage: Omit<ChatMessage, "id">) => {
-      if (loading) {
-        throw new Error("Database is loading");
-      }
+      if (loading) return;
       if (error) {
-        throw new Error("Error loading database");
+        throw new Error("Error loading database.");
       }
       if (!db) {
         throw new Error("Database not initialized");
@@ -57,8 +55,8 @@ export const useCreateChatMessage = () => {
     onSuccess: (data) => {
       // Invalidate relevant queries to refresh the data
       queryClient.invalidateQueries({ queryKey: ["messages"] });
-      queryClient.invalidateQueries({ queryKey: ["messages", data.chat_id] });
-      queryClient.invalidateQueries({ queryKey: ["message", data.id] });
+      queryClient.invalidateQueries({ queryKey: ["messages", data?.chat_id] });
+      queryClient.invalidateQueries({ queryKey: ["message", data?.id] });
     },
     onError: (error) => {
       toast.error(`Failed to create message: ${error.message}`, {
