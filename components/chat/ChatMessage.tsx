@@ -9,7 +9,6 @@ import {
   RotateCcw,
   Copy as CopyIcon,
   Check,
-  MoreVertical,
   FilePlus2,
   DownloadIcon,
 } from "lucide-react";
