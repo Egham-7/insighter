@@ -15,7 +15,7 @@ export default function HomePage() {
 
   // Fetch existing chats for the user
   const { data: chats, isLoading: isChatsLoading } = useGetChats(
-    user?.id || ""
+    user?.id || "",
   );
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export default function HomePage() {
             user_id: user.id,
             created_at: Date.now(),
           });
-          router.push(`/home/chat/${chat.id}`);
+          router.push(`/home/chat/${chat?.id}`);
         }
       } catch (error) {
         console.error("Failed to handle chat navigation:", error);

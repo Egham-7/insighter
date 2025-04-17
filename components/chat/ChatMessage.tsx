@@ -9,16 +9,31 @@ import {
   RotateCcw,
   Copy as CopyIcon,
   Check,
-  Download,
+  MoreVertical,
+  FilePlus2,
+  DownloadIcon,
 } from "lucide-react";
+import { AiFillFileWord } from "react-icons/ai";
+import { SiMarkdown } from "react-icons/si";
 import { EditMessageForm } from "./EditMessageForm";
 import useDeleteChatMessage from "@/hooks/chat/useDeleteChatMessage";
 import MarkdownRenderer from "../MarkdownRenderer";
 import { useUpdateChatMessage } from "@/hooks/chat/useUpdateChatMessage";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
-import { downloadDir } from "@tauri-apps/api/path";
-import { invoke } from "@tauri-apps/api/core";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
+import { writeFile, BaseDirectory, writeTextFile } from "@tauri-apps/plugin-fs";
+import { Document, Packer, Paragraph, TextRun } from "docx";
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -59,45 +74,122 @@ function CopyButton({ content }: { content: string }) {
   );
 }
 
-function ExportPDFButton({ message }: { message: ChatMessageType }) {
-  const handleExportPDF = async () => {
-    try {
-      const downloadsPath = await downloadDir();
-      const fileName = `message-${message.id}.pdf`;
-      const filePath = `${downloadsPath}/${fileName}`;
+async function exportMarkdownToDownloads(content: string, messageId: number) {
+  try {
+    await writeTextFile(`message-${messageId}.md`, content, {
+      baseDir: BaseDirectory.Download,
+    });
+    toast.success("Markdown file saved to Downloads!");
+  } catch (err) {
+    toast.error("Failed to save Markdown file.");
+    console.error(err);
+  }
+}
 
-      await invoke("markdown_to_pdf", {
-        message: message.content,
-        pdfPath: filePath,
-      });
+async function exportDocxToDownloads(content: string, messageId: number) {
+  const paragraphs = content.split(/\n{2,}/g).map(
+    (para) =>
+      new Paragraph({
+        children: para.split("\n").map(
+          (line) =>
+            new TextRun({
+              text: line,
+            }),
+        ),
+      }),
+  );
 
-      toast.success(`PDF exported to Downloads as ${fileName}`);
-    } catch (error) {
-      console.error("Failed to export PDF:", error);
-      toast.error("Could not export PDF");
-    }
-  };
+  const doc = new Document({
+    sections: [
+      {
+        properties: {},
+        children: paragraphs,
+      },
+    ],
+  });
 
+  try {
+    const buffer = await Packer.toBuffer(doc);
+    await writeFile(`message-${messageId}.docx`, buffer, {
+      baseDir: BaseDirectory.Download,
+    });
+    toast.success("DOCX file saved to Downloads!");
+  } catch (err) {
+    toast.error("Failed to save DOCX file.");
+    console.error(err);
+  }
+}
+
+function exportToGoogleDocs(content: string) {
+  window.open("https://docs.new", "_blank");
+  navigator.clipboard.writeText(content);
+  toast.info("Message copied to clipboard. Paste it into the new Google Doc!");
+}
+
+function ExportDropdownMenu({
+  content,
+  messageId,
+}: {
+  content: string;
+  messageId: number;
+}) {
   return (
-    <Button
-      variant="ghost"
-      size="sm"
-      className="h-7 w-7 rounded-full"
-      onClick={handleExportPDF}
-      title="Export as PDF"
-      aria-label="Export as PDF"
-    >
-      <Download size={14} />
-      <span className="sr-only">Export as PDF</span>
-    </Button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 w-7 rounded-full"
+          title="Export"
+          aria-label="Export"
+        >
+          <DownloadIcon />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="flex gap-1 p-2">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DropdownMenuItem
+              className="p-0 w-8 h-8 flex items-center justify-center"
+              onClick={() => exportMarkdownToDownloads(content, messageId)}
+            >
+              <SiMarkdown className="h-5 w-5" />
+            </DropdownMenuItem>
+          </TooltipTrigger>
+          <TooltipContent side="left">Export as Markdown</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DropdownMenuItem
+              className="p-0 w-8 h-8 flex items-center justify-center"
+              onClick={() => exportDocxToDownloads(content, messageId)}
+            >
+              <AiFillFileWord className="h-5 w-5 text-blue-600" />
+            </DropdownMenuItem>
+          </TooltipTrigger>
+          <TooltipContent side="left">Export as DOCX</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DropdownMenuItem
+              className="p-0 w-8 h-8 flex items-center justify-center"
+              onClick={() => exportToGoogleDocs(content)}
+            >
+              <FilePlus2 className="h-5 w-5" />
+            </DropdownMenuItem>
+          </TooltipTrigger>
+          <TooltipContent side="left">Export to Google Docs</TooltipContent>
+        </Tooltip>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
 function AIMessageActions({ message }: { message: ChatMessageType }) {
   return (
-    <div className="ml-4 flex items-start gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute right-0 top-0">
+    <div className="ml-4 flex items-start gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
       <CopyButton content={message.content} />
-      <ExportPDFButton message={message} />
+      <ExportDropdownMenu content={message.content} messageId={message.id} />
     </div>
   );
 }
@@ -181,7 +273,7 @@ export function ChatMessage({
 function AIMessage({ message }: { message: ChatMessageType }) {
   return (
     <div className="mb-6 flex flex-col w-full group relative">
-      <div className="flex-1">
+      <div className="flex-1" id={`message-content-${message.id}`}>
         <MarkdownRenderer content={message.content} />
         {message.attachments && message.attachments.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-2">
@@ -260,10 +352,7 @@ function UserMessage({
     <div className="mb-6 flex flex-col group items-end">
       <div className="max-w-[80%]">
         <div
-          className={cn(
-            "rounded-2xl px-4 py-3",
-            "bg-primary text-primary-foreground",
-          )}
+          className={cn("rounded-2xl px-4 py-3", " text-primary-foreground")}
         >
           <MarkdownRenderer content={message.content} />
           {message.attachments && message.attachments.length > 0 && (

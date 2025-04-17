@@ -27,7 +27,6 @@ pub fn run() {
 
     builder = builder.invoke_handler(tauri::generate_handler![
         crate::handlers::parsers::parse_file,
-        crate::handlers::markdown_pdf::markdown_to_pdf
     ]);
 
     builder

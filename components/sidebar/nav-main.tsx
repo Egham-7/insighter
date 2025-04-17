@@ -221,7 +221,7 @@ export function NavMain({
         created_at: Date.now(),
       });
 
-      router.push(`/home/chat/${chat.id}`);
+      router.push(`/home/chat/${chat?.id}`);
     } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message);
