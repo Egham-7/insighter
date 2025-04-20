@@ -17,12 +17,18 @@ importers:
       '@browserbasehq/stagehand':
         specifier: ^2.1.0
         version: 2.1.0(@playwright/test@1.52.0)(deepmerge@4.3.1)(dotenv@16.5.0)(zod@3.24.3)
+      '@libsql/client':
+        specifier: ^0.14.0
+        version: 0.14.0
       '@mastra/core':
         specifier: ^0.8.3
         version: 0.8.3(react@19.1.0)
       '@mastra/memory':
         specifier: ^0.2.10
         version: 0.2.10(react@19.1.0)
+      libsql:
+        specifier: ^0.4.7
+        version: 0.4.7
       next:
         specifier: 15.3.1
         version: 15.3.1(@babel/core@7.26.10)(@opentelemetry/api@1.9.0)(@playwright/test@1.52.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -42,6 +48,9 @@ importers:
       mastra:
         specifier: ^0.4.9
         version: 0.4.9(@opentelemetry/api@1.9.0)(react@19.1.0)(typescript@5.8.3)
+      playwright:
+        specifier: ^1.52.0
+        version: 1.52.0
       tsx:
         specifier: ^4.19.3
         version: 4.19.3
