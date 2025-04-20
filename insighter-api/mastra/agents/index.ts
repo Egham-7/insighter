@@ -11,6 +11,7 @@ import {
 
 const memory = new Memory({
   processors: [new TokenLimiter(30000)],
+  embedder: openai.embedding("text-embedding-3-small"),
   options: {
     workingMemory: {
       enabled: true,
