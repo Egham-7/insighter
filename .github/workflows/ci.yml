@@ -3,8 +3,12 @@ name: Desktop App CI
 on:
   push:
     branches: [main]
+    paths:
+      - "insighter/**"
   pull_request:
     branches: [main]
+    paths:
+      - "insighter/**"
 
 jobs:
   test:

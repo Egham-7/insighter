@@ -3,8 +3,12 @@ name: API CI
 on:
   push:
     branches: [main]
+    paths:
+      - "insighter-api/**"
   pull_request:
     branches: [main]
+    paths:
+      - "insighter-api/**"
 
 jobs:
   test:
