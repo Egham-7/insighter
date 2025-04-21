@@ -1,6 +1,7 @@
 import mermaid from "mermaid";
 import { Canvg } from "canvg";
-
+import { writeFile, BaseDirectory } from "@tauri-apps/plugin-fs";
+import { downloadDir, join } from "@tauri-apps/api/path";
 /** Render Mermaid code to SVG string in the browser. */
 export async function renderMermaidToSVG(code: string) {
   const id = "mermaid-svg-" + Math.random().toString(36).substring(2, 9);
@@ -43,15 +44,6 @@ export async function svgToPngBuffer(
   });
 }
 
-/**
- * Preprocess Markdown in the browser:
- * - Finds all ```mermaid code blocks
- * - Renders each to SVG, then to PNG (as a data URL)
- * - Replaces the code block with a Markdown image using the data URL
- *
- * @param markdown The original Markdown string
- * @returns The processed Markdown string with Mermaid diagrams as images
- */
 export async function preprocessMarkdownWithMermaid(
   markdown: string,
 ): Promise<string> {
@@ -60,22 +52,29 @@ export async function preprocessMarkdownWithMermaid(
 
   if (matches.length === 0) return markdown;
 
-  // Prepare replacements in parallel
   const replacements = await Promise.all(
     matches.map(async (match, i) => {
       const code = match[1];
       const svgResult = await renderMermaidToSVG(code);
       const pngBuffer = await svgToPngBuffer(svgResult.svg);
-      const dataUrl = await bufferToDataUrl(pngBuffer, "image/png");
+      const filename = `mermaid-diagram-${i + 1}.png`;
+
+      // Write PNG to Downloads directory
+      await writeFile(filename, pngBuffer, { baseDir: BaseDirectory.Download });
+
+      // Get the absolute path to the file in Downloads
+      const downloadsPath = await downloadDir();
+      const fullPath = await join(downloadsPath, filename);
+
+      // Use the full path in the Markdown image
       return {
         start: match.index!,
         end: match.index! + match[0].length,
-        replacement: `![Mermaid Diagram ${i + 1}](${dataUrl})`,
+        replacement: `![Mermaid Diagram ${i + 1}](${fullPath})`,
       };
     }),
   );
 
-  // Build the new markdown string with replacements
   let result = "";
   let lastIndex = 0;
   for (const { start, end, replacement } of replacements) {
@@ -85,17 +84,4 @@ export async function preprocessMarkdownWithMermaid(
   result += markdown.slice(lastIndex);
 
   return result;
-}
-
-/** Helper: Convert a Uint8Array buffer to a data URL */
-async function bufferToDataUrl(
-  buffer: Uint8Array,
-  mimeType: string,
-): Promise<string> {
-  const blob = new Blob([buffer], { type: mimeType });
-  return await new Promise<string>((resolve) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.readAsDataURL(blob);
-  });
 }

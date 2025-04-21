@@ -76,9 +76,10 @@ function CopyButton({ content }: { content: string }) {
   );
 }
 
-async function exportMarkdownToDownloads(content: string, messageId: number) {
+async function exportMarkdownToDownloads(content: string) {
   try {
-    await writeTextFile(`message-${messageId}.md`, content, {
+    const title = content.split("\n")[0].replace(/^#\s*/, "");
+    await writeTextFile(`${title}.md`, content, {
       baseDir: BaseDirectory.Download,
     });
     toast.success("Markdown file saved to Downloads!");
@@ -88,14 +89,16 @@ async function exportMarkdownToDownloads(content: string, messageId: number) {
   }
 }
 
-async function exportMarkdownToPdf(content: string, messageId: number) {
+async function exportMarkdownToPdf(content: string) {
   try {
     const downloadDirectory = await downloadDir();
-    const preprocessedMarkdown = preprocessMarkdownWithMermaid(content);
+    const preprocessedMarkdown = await preprocessMarkdownWithMermaid(content);
+    // First Heading in markdown is used as the title
+    const title = content.split("\n")[0].replace(/^#\s*/, "");
 
     await invoke("markdown_to_pdf", {
       markdown: preprocessedMarkdown,
-      outputPath: `${downloadDirectory}/message-${messageId}.pdf`,
+      outputPath: `${downloadDirectory}/${title}`,
     });
     toast.success("PDF file saved to Downloads!");
   } catch (err) {
@@ -104,11 +107,12 @@ async function exportMarkdownToPdf(content: string, messageId: number) {
   }
 }
 
-async function exportDocxToDownloads(content: string, messageId: number) {
+async function exportDocxToDownloads(content: string) {
   try {
     const buffer = await markdownToDocx(content);
+    const title = content.split("\n")[0].replace(/^#\s*/, "");
 
-    await writeFile(`message-${messageId}.docx`, buffer, {
+    await writeFile(`${title}.docx`, buffer, {
       baseDir: BaseDirectory.Download,
     });
     toast.success("DOCX file saved to Downloads!");
@@ -118,13 +122,7 @@ async function exportDocxToDownloads(content: string, messageId: number) {
   }
 }
 
-function ExportDropdownMenu({
-  content,
-  messageId,
-}: {
-  content: string;
-  messageId: number;
-}) {
+function ExportDropdownMenu({ content }: { content: string }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -143,7 +141,7 @@ function ExportDropdownMenu({
           <TooltipTrigger asChild>
             <DropdownMenuItem
               className="p-0 w-8 h-8 flex items-center justify-center"
-              onClick={() => exportMarkdownToDownloads(content, messageId)}
+              onClick={() => exportMarkdownToDownloads(content)}
             >
               <SiMarkdown className="h-5 w-5" />
             </DropdownMenuItem>
@@ -154,7 +152,7 @@ function ExportDropdownMenu({
           <TooltipTrigger asChild>
             <DropdownMenuItem
               className="p-0 w-8 h-8 flex items-center justify-center"
-              onClick={() => exportDocxToDownloads(content, messageId)}
+              onClick={() => exportDocxToDownloads(content)}
             >
               <AiFillFileWord className="h-5 w-5 text-blue-600" />
             </DropdownMenuItem>
@@ -166,7 +164,7 @@ function ExportDropdownMenu({
           <TooltipTrigger asChild>
             <DropdownMenuItem
               className="p-0 w-8 h-8 flex items-center justify-center"
-              onClick={() => exportMarkdownToPdf(content, messageId)}
+              onClick={() => exportMarkdownToPdf(content)}
             >
               <FaFilePdf className="h-5 w-5 text-red-600" />
             </DropdownMenuItem>
@@ -182,7 +180,7 @@ function AIMessageActions({ message }: { message: ChatMessageType }) {
   return (
     <div className="ml-4 flex items-start gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
       <CopyButton content={message.content} />
-      <ExportDropdownMenu content={message.content} messageId={message.id} />
+      <ExportDropdownMenu content={message.content} />
     </div>
   );
 }
