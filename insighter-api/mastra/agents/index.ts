@@ -8,10 +8,22 @@ import {
   reportWriter,
   runStatisticalTest,
 } from "../tools";
+import { LibSQLStore } from "@mastra/core/storage/libsql";
+import { LibSQLVector } from "@mastra/core/vector/libsql";
 
 const memory = new Memory({
   processors: [new TokenLimiter(30000)],
   embedder: openai.embedding("text-embedding-3-small"),
+  storage: new LibSQLStore({
+    config: {
+      url: process.env.DATABASE_URL || "file:local.db",
+      authToken: process.env.DATABASE_AUTH_TOKEN,
+    },
+  }),
+  vector: new LibSQLVector({
+    connectionUrl: process.env.DATABASE_URL || "file:local.db",
+    authToken: process.env.DATABASE_AUTH_TOKEN,
+  }),
   options: {
     workingMemory: {
       enabled: true,
