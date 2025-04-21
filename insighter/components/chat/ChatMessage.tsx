@@ -9,11 +9,11 @@ import {
   RotateCcw,
   Copy as CopyIcon,
   Check,
-  FilePlus2,
   DownloadIcon,
 } from "lucide-react";
 import { AiFillFileWord } from "react-icons/ai";
 import { SiMarkdown } from "react-icons/si";
+import { FaFilePdf } from "react-icons/fa";
 import { EditMessageForm } from "./EditMessageForm";
 import useDeleteChatMessage from "@/hooks/chat/useDeleteChatMessage";
 import MarkdownRenderer from "../MarkdownRenderer";
@@ -32,7 +32,10 @@ import {
   TooltipContent,
 } from "@/components/ui/tooltip";
 import { writeFile, BaseDirectory, writeTextFile } from "@tauri-apps/plugin-fs";
-import { Document, Packer, Paragraph, TextRun } from "docx";
+import { markdownToDocx } from "@/lib/exporters/docx";
+import { invoke } from "@tauri-apps/api/core";
+import { downloadDir } from "@tauri-apps/api/path";
+import { preprocessMarkdownWithMermaid } from "@/lib/utils/mermaid";
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -85,30 +88,26 @@ async function exportMarkdownToDownloads(content: string, messageId: number) {
   }
 }
 
-async function exportDocxToDownloads(content: string, messageId: number) {
-  const paragraphs = content.split(/\n{2,}/g).map(
-    (para) =>
-      new Paragraph({
-        children: para.split("\n").map(
-          (line) =>
-            new TextRun({
-              text: line,
-            }),
-        ),
-      }),
-  );
-
-  const doc = new Document({
-    sections: [
-      {
-        properties: {},
-        children: paragraphs,
-      },
-    ],
-  });
-
+async function exportMarkdownToPdf(content: string, messageId: number) {
   try {
-    const buffer = await Packer.toBuffer(doc);
+    const downloadDirectory = await downloadDir();
+    const preprocessedMarkdown = preprocessMarkdownWithMermaid(content);
+
+    await invoke("markdown_to_pdf", {
+      markdown: preprocessedMarkdown,
+      outputPath: `${downloadDirectory}/message-${messageId}.pdf`,
+    });
+    toast.success("PDF file saved to Downloads!");
+  } catch (err) {
+    toast.error("Failed to save as PDF file.");
+    console.error(err);
+  }
+}
+
+async function exportDocxToDownloads(content: string, messageId: number) {
+  try {
+    const buffer = await markdownToDocx(content);
+
     await writeFile(`message-${messageId}.docx`, buffer, {
       baseDir: BaseDirectory.Download,
     });
@@ -117,12 +116,6 @@ async function exportDocxToDownloads(content: string, messageId: number) {
     toast.error("Failed to save DOCX file.");
     console.error(err);
   }
-}
-
-function exportToGoogleDocs(content: string) {
-  window.open("https://docs.new", "_blank");
-  navigator.clipboard.writeText(content);
-  toast.info("Message copied to clipboard. Paste it into the new Google Doc!");
 }
 
 function ExportDropdownMenu({
@@ -168,16 +161,17 @@ function ExportDropdownMenu({
           </TooltipTrigger>
           <TooltipContent side="left">Export as DOCX</TooltipContent>
         </Tooltip>
+
         <Tooltip>
           <TooltipTrigger asChild>
             <DropdownMenuItem
               className="p-0 w-8 h-8 flex items-center justify-center"
-              onClick={() => exportToGoogleDocs(content)}
+              onClick={() => exportMarkdownToPdf(content, messageId)}
             >
-              <FilePlus2 className="h-5 w-5" />
+              <FaFilePdf className="h-5 w-5 text-red-600" />
             </DropdownMenuItem>
           </TooltipTrigger>
-          <TooltipContent side="left">Export to Google Docs</TooltipContent>
+          <TooltipContent side="left">Export as PDF</TooltipContent>
         </Tooltip>
       </DropdownMenuContent>
     </DropdownMenu>
