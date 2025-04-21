@@ -64,7 +64,7 @@ export function ChatForm({
     setCompletion,
     stop,
   } = useCompletion({
-    api: "http://localhost:3001/chat",
+    api: `${process.env.NEXT_PUBLIC_API_URL}/chat`,
     onFinish: async (_prompt: string, completion) => {
       await createChatMessage({
         role: "assistant",
