@@ -1,12 +1,14 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import {
   AudioWaveform,
   Command,
   GalleryVerticalEnd,
   MessageSquare,
   Loader2,
+  LayoutDashboard, // Add this import
 } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { useGetChats } from "@/hooks/chat/useGetChats";
@@ -103,6 +105,7 @@ function ChatNavigationContent({
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const router = useRouter(); // Add this line
   const { user, isLoaded: isUserLoaded } = useUser();
   const userId = user?.id || "";
 
@@ -144,6 +147,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
 
       <SidebarContent className="flex flex-col">
+        <Button
+          variant="ghost"
+          className="flex items-center gap-2 w-full px-4 py-2 justify-start hover:bg-accent"
+          onClick={() => router.push("/")}
+        >
+          <LayoutDashboard size={18} className="text-muted-foreground" />
+          <span className="text-sm font-medium">Dashboard</span>
+        </Button>
+
         <ChatNavigationContent
           isLoading={isChatsLoading}
           error={chatsError}
