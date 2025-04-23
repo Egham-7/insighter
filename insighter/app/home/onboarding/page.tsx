@@ -117,7 +117,7 @@ const OnboardingPage = () => {
               Welcome to Insighter for Business!
             </CardTitle>
             <CardDescription className="text-center">
-              Let's set up your business profile
+              {"Let's set up your business profile"}
             </CardDescription>
             <Progress value={progressValue} className="mt-2" />
           </CardHeader>
