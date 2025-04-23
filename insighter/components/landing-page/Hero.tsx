@@ -157,7 +157,7 @@ export default function HeroSection() {
                     variant="ghost"
                     className="h-10.5 rounded-xl px-5"
                   >
-                    <Link href="#link">
+                    <Link href="/home/onboarding">
                       <span className="text-nowrap">Request a demo</span>
                     </Link>
                   </Button>
